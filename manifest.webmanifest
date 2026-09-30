@@ -1,0 +1,11 @@
+{
+  "name": "Photo Reading Scanner V9.0",
+  "short_name": "Photo Meter",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1a4a8a",
+  "orientation": "portrait-primary",
+  "icons": []
+}

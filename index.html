@@ -1,0 +1,1912 @@
+<!DOCTYPE html><html><head>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#1a4a8a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+
+<!-- V9.0 PWA BACKEND BRIDGE -->
+<script id="v9PwaBridge">
+(function(){
+  const V9_BACKEND_URL = "https://script.google.com/macros/s/AKfycbyq8ifopysUPBP_F6e4-6S3w6_OgkCxWp0jJSMZV7eNaXSNb2wk9TH3O21EUEUw3TNh/exec";
+  let bridgeFrame = null;
+  let bridgeReady = false;
+  let seq = 0;
+  const pending = new Map();
+
+  function ensureBridge(){
+    if(bridgeFrame) return bridgeFrame;
+    bridgeFrame = document.createElement('iframe');
+    bridgeFrame.id = 'v9BackendBridgeFrame';
+    bridgeFrame.title = 'V9 Backend Bridge';
+    bridgeFrame.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;border:0;pointer-events:none;left:-10px;top:-10px;';
+    bridgeFrame.src = V9_BACKEND_URL + (V9_BACKEND_URL.indexOf('?') >= 0 ? '&' : '?') + 'bridge=1';
+    document.documentElement.appendChild(bridgeFrame);
+    return bridgeFrame;
+  }
+
+  window.addEventListener('message', function(event){
+    const d = event.data || {};
+    if(!d || d.v9Bridge !== 'PhotoReadingScanner') return;
+    if(d.type === 'READY'){
+      bridgeReady = true;
+      return;
+    }
+    if(d.type !== 'RESPONSE') return;
+    const item = pending.get(d.id);
+    if(!item) return;
+    pending.delete(d.id);
+    if(d.ok) item.success(d.result);
+    else item.failure(new Error(d.error || 'Backend error'));
+  });
+
+  function call(method, args, success, failure){
+    if(!navigator.onLine){
+      if(typeof failure === 'function') failure(new Error('Offline'));
+      return;
+    }
+    ensureBridge();
+    const id = 'v9_' + (++seq) + '_' + Date.now();
+    pending.set(id, {
+      success: typeof success === 'function' ? success : function(){},
+      failure: typeof failure === 'function' ? failure : function(){}
+    });
+    const send = function(){
+      try{
+        bridgeFrame.contentWindow.postMessage({
+          v9Bridge:'PhotoReadingScanner',
+          type:'CALL', id:id, method:String(method||''), args:Array.isArray(args)?args:[]
+        }, '*');
+      }catch(err){
+        pending.delete(id);
+        if(typeof failure === 'function') failure(err);
+      }
+    };
+    if(bridgeReady) send();
+    else {
+      let tries = 0;
+      const wait = setInterval(function(){
+        if(bridgeReady){ clearInterval(wait); send(); }
+        else if(++tries >= 50){ clearInterval(wait); pending.delete(id); if(typeof failure==='function') failure(new Error('Backend bridge timeout')); }
+      },100);
+    }
+    setTimeout(function(){
+      if(pending.has(id)){
+        pending.delete(id);
+        if(typeof failure === 'function') failure(new Error('Backend request timeout'));
+      }
+    }, 30000);
+  }
+
+  function makeRunner(success, failure){
+    return new Proxy({}, {
+      get:function(target, prop){
+        if(prop === 'withSuccessHandler') return function(fn){ return makeRunner(fn, failure); };
+        if(prop === 'withFailureHandler') return function(fn){ return makeRunner(success, fn); };
+        if(prop === 'withUserObject') return function(){ return makeRunner(success, failure); };
+        return function(){ return call(prop, Array.from(arguments), success, failure); };
+      }
+    });
+  }
+
+  if(typeof window.google === 'undefined') window.google = {};
+  if(!window.google.script) window.google.script = {};
+  window.google.script.run = makeRunner(function(){}, function(){});
+
+  // Service Worker registration must run only on an HTTPS/static origin.
+  if('serviceWorker' in navigator && location.protocol === 'https:'){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./sw.js').catch(function(err){ console.warn('V9 Service Worker:', err); });
+    });
+  }
+})();
+</script>
+<base target="_top"><meta name="viewport" content="width=device-width,initial-scale=0.85,maximum-scale=5,user-scalable=yes,viewport-fit=cover"><title>V8.0 FIX MAIN BESAR + SETTINGS + KEYPAD</title>
+<style>
+
+/* HEADER 120PX - SUPER BESAR */
+.app-header{
+  position: fixed!important;
+  top: 0!important;
+  left: 0!important;
+  right: 0!important;
+  width: 100vw!important;
+  height: 120px!important;
+  min-height: 120px!important;
+  z-index: 9999!important;
+  background: #ffffff!important;
+  border-bottom: 4px solid #0ea5e9!important;
+  box-shadow: 0 8px 28px rgba(0,0,0,.18)!important;
+  display: flex!important;
+  justify-content: space-between!important;
+  align-items: center!important;
+  padding: 14px 20px!important;
+}
+body{
+  padding-top: 120px!important;
+}
+.container{
+  padding-top: 14px!important;
+}
+.app-header img{
+  height: 85px!important;
+  width: auto!important;
+  object-fit: contain!important;
+}
+.app-header div, .app-header span, .app-header b, .app-header p{
+  font-size: 20px!important;
+  font-weight: 900!important;
+  line-height: 1.3!important;
+}
+
+@keyframes spinDash{to{transform:rotate(360deg)}}@keyframes pulseCam{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}@keyframes floatText{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}@keyframes spin{to{transform:rotate(360deg)}}
+*{box-sizing:border-box}html,body{margin:0;padding:0;width:100%;min-height:100vh;background:#eef3f7;color:#17324d;overflow-x:hidden}
+.container{max-width:100%!important;width:100%!important;padding:12px!important;display:block!important}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);width:100%!important;border:1px solid #e8eef2}
+select,input{width:100%;padding:14px;border:1.5px solid #c9d6df;border-radius:10px;font-size:15px;background:#fff;min-height:52px;font-weight:600}
+label{font-size:11px;font-weight:800;margin-bottom:5px;display:block;color:#475569}.field{margin-bottom:12px}
+button{border:none;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:800;cursor:pointer;min-height:50px}
+.btn-camera{background:#0066a1;color:#fff;width:100%;min-height:56px}.btn-gallery{background:#0b8f5a;color:#fff;width:100%;min-height:56px}.btn-primary{background:#0066a1;color:#fff;width:100%}
+.status{padding:10px;border-radius:10px;background:#edf5f9;font-size:13px;margin-bottom:10px}.status.success{background:#e8f7ef;color:#12633e}.status.error{background:#fdecec;color:#9b1c1c}
+.photo-vertical{display:flex;flex-direction:column;gap:10px}
+.photo-card-inline{border:2px solid #d8e2e8;border-radius:14px;background:#fff;display:flex;gap:12px;padding:12px;align-items:center}.photo-card-inline.done{border-color:#0b8f5a;background:#f0fdf4}
+.photo-card-inline img{width:74px;height:74px;object-fit:cover;object-position:center center;border-radius:10px;flex-shrink:0;border:1px solid #e2e8f0}
+.app-header{background:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eef2f7;position:sticky;top:0;z-index:100}
+.upload-overlay{position:fixed;inset:0;background:rgba(255,255,255,.92);z-index:9999;display:none;align-items:center;justify-content:center}.upload-box{background:#fff;padding:20px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);text-align:center;width:90%;max-width:340px}.upload-spinner{width:30px;height:30px;margin:10px auto;border:3px solid #dce6ee;border-top-color:#1976d2;border-radius:50%;animation:spin .9s linear infinite}
+.editor-overlay{position:fixed;inset:0;background:#0f172a;z-index:2000;display:none;flex-direction:column;height:100dvh;width:100vw;overflow:hidden}
+.editor-top{height:32dvh;min-height:32dvh;max-height:32dvh;position:relative;background:#000;flex-shrink:0;overflow:hidden;touch-action:none}
+.editor-top img{width:100%;height:100%;object-fit:contain;transform-origin:center center;cursor:grab}
+.editor-top-bar{position:absolute;top:0;left:0;right:0;padding:10px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(0,0,0,.85),transparent);z-index:2}
+.editor-mid{height:26dvh;min-height:26dvh;max-height:26dvh;overflow-y:auto;background:#f8fafc;padding:12px;border-bottom:2px solid #e2e8f0}
+.editor-bottom{height:42dvh;min-height:42dvh;max-height:42dvh;flex-shrink:0;background:#ffffff;display:flex;flex-direction:column;overflow:hidden}
+.keypad-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:8px;padding:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom));flex:1;background:#fff}
+.keypad-btn{background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;font-size:40px;font-weight:800;color:#0f172a;display:flex;align-items:center;justify-content:center;min-height:0!important;height:100%!important}
+.keypad-btn.action{background:#eef2f7;font-size:40px}.keypad-btn.save{background:#0b8f5a;color:#fff;border-color:#0b8f5a;font-size:40px}
+.input-focus{border-color:#0ea5e9!important;box-shadow:0 0 0 3px rgba(14,165,233,.2)!important}
+.reading-row{display:flex;gap:8px;align-items:center;background:#fff;padding:10px;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:8px}.reading-row.active{border-color:#0ea5e9;background:#f0f9ff}
+.settings-modal{position:fixed;inset:0;background:rgba(15,23,42,.88);z-index:3000;display:none;align-items:flex-start;justify-content:center;padding:10px;overflow-y:auto}.settings-modal.active{display:flex}.settings-card{background:#fff;border-radius:18px;padding:16px;width:100%;max-width:440px;margin:10px auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.tab-btn{border:none;padding:8px;font-size:11px;font-weight:800;border-radius:10px;cursor:pointer;flex:1;background:#f1f5f9;color:#334155;min-height:38px}.tab-btn.active{background:#0f172a!important;color:#fff!important}
+.tab-content{display:none!important}.tab-content.active{display:block!important}
+.validation-error{border-color:#dc2626!important;box-shadow:0 0 0 3px rgba(220,38,38,.2)!important}
+.log-filter-btn{padding:7px 13px;font-size:11px;font-weight:800;border-radius:20px;border:1.5px solid #cbd5e1;cursor:pointer;background:#fff;color:#0f172a}.log-filter-btn.active{background:#0091d5!important;color:#fff!important;border-color:#0091d5!important}
+.firsttime-overlay{position:fixed;inset:0;background:#f8fafc;z-index:5000;display:flex;align-items:center;justify-content:center;padding:16px}.firsttime-card{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.15);border:1px solid #e2e8f0}
+.admin-lock-modal{position:fixed;inset:0;background:rgba(15,23,42,.9);z-index:4000;display:none;align-items:center;justify-content:center;padding:16px}.admin-lock-modal.active{display:flex}.admin-lock-card{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:360px;text-align:center}
+#liveStatus{flex:1!important;height:34px!important;min-height:34px!important;border-radius:20px!important;font-size:11px!important;font-weight:800!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.live-online{background:#16a34a!important;color:#fff!important}.live-offline{background:#dc2626!important;color:#fff!important;animation:blinkSolidRed 1s infinite}@keyframes blinkSolidRed{0%,100%{opacity:1}50%{opacity:0.3}}
+button:hover{filter:brightness(1.08)!important}button:active{transform:scale(0.96)!important}
+
+/* ZOOM MAIN SAJA - KEYPAD TAK POTONG */
+.container{zoom:2.00!important}
+.editor-overlay, .settings-modal, .firsttime-overlay, .admin-lock-modal{zoom:1!important}
+
+.editor-bottom{height:44dvh!important;min-height:44dvh!important;max-height:44dvh!important}
+.keypad-grid{padding-bottom:calc(16px + env(safe-area-inset-bottom))!important}
+
+</style>
+<style id="editPhotoDirectFinal">
+#editorOverlay .keypad-btn,
+#editorOverlay .keypad-btn.action,
+#editorOverlay .keypad-btn.save{
+  font-size:50px!important;
+  font-weight:900!important;
+}
+#editorOverlay .editor-mid select{
+  font-size:22px!important;
+  font-weight:900!important;
+  min-height:60px!important;
+}
+#editorOverlay .editor-mid label{
+  font-size:17px!important;
+  font-weight:900!important;
+}
+#editorOverlay .editor-mid select{
+  font-size:32px!important;
+  font-weight:900!important;
+  min-height:74px!important;
+}
+#editorOverlay .editor-mid label{
+  font-size:25px!important;
+  font-weight:900!important;
+}
+#editorOverlay .editor-mid input[id^="edit_read_"]{
+  font-size:46px!important;
+  font-weight:900!important;
+  min-height:74px!important;
+}
+#editorOverlay .editor-mid input[id^="edit_read_"]{
+  width:260px!important;
+  min-width:260px!important;
+  flex:0 0 260px!important;
+}
+</style>
+
+
+<style id="operatorPhotoCropFinal">
+#operatorAvatar {
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  width: 100px !important;
+  height: 100px !important;
+  flex: 0 0 100px !important;
+}
+#operatorAvatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  border-radius: 50% !important;
+  display: block !important;
+}
+</style>
+
+
+<style id="operatorPhotoCropHardFix">
+#operatorAvatar,
+#operatorAvatar.avatar,
+.operator-avatar,
+.operator-photo {
+  width: 100px !important;
+  height: 100px !important;
+  min-width: 100px !important;
+  min-height: 100px !important;
+  max-width: 100px !important;
+  max-height: 100px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+#operatorAvatar img,
+#operatorAvatar > img,
+#operatorAvatar.avatar img,
+.operator-avatar img,
+.operator-photo img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: 50% 50% !important;
+  border-radius: 50% !important;
+  display: block !important;
+}
+</style>
+
+
+<style id="operatorCircleCropFinal">
+#headerOperatorPhoto {
+  width:100px !important;
+  height:100px !important;
+  min-width:100px !important;
+  min-height:100px !important;
+  max-width:100px !important;
+  max-height:100px !important;
+  border-radius:50% !important;
+  overflow:hidden !important;
+  clip-path:circle(50% at 50% 50%) !important;
+  padding:0 !important;
+}
+#headerOperatorPhoto img {
+  width:100% !important;
+  height:100% !important;
+  display:block !important;
+  border-radius:50% !important;
+  object-fit:cover !important;
+  object-position:50% 50% !important;
+  clip-path:circle(50% at 50% 50%) !important;
+}
+</style>
+
+
+<style id="helpLegendParameterStyle">
+.helpLegendParam{
+  display:block;
+  font-size:13px;
+  font-weight:800;
+  line-height:1.35;
+  margin:3px 0;
+  color:#334155;
+}
+.helpLegendParam span{
+  display:inline-block;
+  margin-left:5px;
+  padding:2px 7px;
+  border-radius:8px;
+  background:#eff6ff;
+  color:#1d4ed8;
+  font-weight:900;
+}
+.helpLegendMuted{
+  color:#64748b;
+  font-weight:700;
+}
+</style>
+
+
+<style id="helpLegendMasterMap">
+.helpLegendMasterNote{
+  margin-top:6px;
+  font-size:11px;
+  color:#64748b;
+  font-weight:700;
+}
+</style>
+
+
+<style id="helpDriveServerImageFinal">
+.helpLegendPhoto img.helpDriveImage{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  display:block !important;
+}
+.helpLegendPhotoFallback{
+  width:100%;
+  height:100%;
+  min-height:180px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  text-align:center;
+  color:#64748b;
+  background:#e2e8f0;
+  font-weight:800;
+  padding:12px;
+  box-sizing:border-box;
+}
+.helpLegendPhotoFallback small{font-size:11px;font-weight:700;line-height:1.25;}
+</style>
+
+
+<style id="helpPhotoFullInBoxFinal">
+/* HELP PHOTO: paparkan keseluruhan gambar tanpa crop */
+.helpLegendPhoto{
+  display:flex !important;
+  width:100% !important;
+  aspect-ratio:16/10 !important;
+  height:auto !important;
+  background:#f1f5f9 !important;
+  overflow:hidden !important;
+  text-decoration:none !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+.helpLegendPhoto img.helpDriveImage{
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  object-position:center center !important;
+  display:block !important;
+  background:#f1f5f9 !important;
+}
+</style>
+</head><body>
+<div id="v9PwaBadge" style="position:fixed;right:8px;bottom:8px;z-index:99999;background:#1a4a8a;color:#fff;padding:5px 8px;border-radius:10px;font-size:9px;font-weight:800;opacity:.78">V9.0 PWA</div>
+
+<div id="firstTimeOverlay" class="firsttime-overlay" style="display:none"><div class="firsttime-card"><div style="text-align:center"><div style="font-size:36px">👷‍♂️</div><div style="font-weight:800;font-size:16px">WELCOME</div></div><div class="field"><label>📦 PILIH SECTION *</label><select id="ftSection" onchange="ftFilterOperator()" style="background:#fef3c7;font-weight:800;border:2px solid #f59e0b;padding:14px"><option value="">-- Pilih Section --</option></select></div><div class="field"><label>👷 PILIH OPERATOR *</label><select id="ftOperator" style="padding:14px;font-weight:700"><option value="">-- Pilih Section dulu --</option></select></div><div id="ftStatus" class="status" style="display:none"></div><button type="button" onclick="saveFirstTimeSetup()" style="background:#0b8f5a;color:#fff;width:100%;padding:16px;margin-top:12px;border-radius:12px">✅ CONFIRM & MASUK</button></div></div>
+<div id="resetAdminModal" class="admin-lock-modal"><div class="admin-lock-card"><div style="font-size:32px">🔐</div><div style="font-weight:800;font-size:14px;margin:8px 0">RESET OPERATOR - ADMIN ONLY</div><div class="field" style="text-align:left"><label>Password Admin *</label><input id="resetAdminPass" type="password" placeholder="Masukkan Admin Password"></div><div id="resetAdminStatus" class="status" style="display:none"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button type="button" onclick="cancelResetAdmin()" style="background:#e2e8f0;padding:12px">Batal</button><button type="button" onclick="confirmResetAdmin()" style="background:#dc2626;color:#fff;padding:12px">🗑️ Reset</button></div></div></div>
+<div id="uploadOverlay" class="upload-overlay"><div class="upload-box"><div style="font-weight:700" id="uploadTitle">⏳ Processing</div><div class="upload-spinner"></div><div id="uploadMessage" style="font-size:12px">Compressing...</div></div></div>
+<div id="settingsModal" class="settings-modal"><div class="settings-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="margin:0">⚙️ Settings</h3><button type="button" onclick="closeSettings()" style="background:#e2e8f0;padding:6px 12px">✕</button></div><div style="background:#fee2e2;border:1px solid #fecaca;padding:10px;border-radius:10px;margin-bottom:10px"><div style="font-weight:700;font-size:11px;color:#991b1b">🔐 Reset Operator</div><button type="button" onclick="openResetAdmin()" style="background:#dc2626;color:#fff;width:100%;padding:10px;margin-top:6px">🔐 RESET OPERATOR</button></div><div style="display:flex;gap:4px;margin-bottom:14px;background:#f1f5f9;padding:5px;border-radius:12px"><button id="tabSection" class="tab-btn" onclick="switchTab('Section')">📦 Sec</button><button id="tabOp" class="tab-btn active" onclick="switchTab('Op')">👷 Op</button><button id="tabLoc" class="tab-btn" onclick="switchTab('Loc')">🌍 Loc</button><button id="tabMeter" class="tab-btn" onclick="switchTab('Meter')">🔧 Meter</button><button id="tabPage" class="tab-btn" onclick="switchTab('Page')">📄 Page</button><button id="tabParams" class="tab-btn" onclick="switchTab('Params')">🔬 Param</button></div><div id="contentSection" class="tab-content"><div class="field"><label>Section ID</label><input id="newSecId" placeholder="LIQUID" style="text-transform:uppercase"></div><div class="field"><label>Section Name</label><input id="newSecName" placeholder="Liquid Section"></div><div class="field"><label>Description</label><input id="newSecDesc" placeholder="Waste"></div><button type="button" class="btn-primary" style="background:#be185d" onclick="registerSectionUI()">+ Add Section</button><div id="secList" style="margin-top:8px"></div><div id="secStatus" class="status" style="display:none"></div></div><div id="contentOp" class="tab-content active"><div class="field"><label>📦 Section Operator *</label><select id="newOperatorSection" style="background:#fef3c7;font-weight:700"><option value="">-- Pilih --</option></select></div><div class="field"><label>Nama Baru *</label><div style="display:flex;gap:6px"><input id="newOperatorName" placeholder="ALI" style="flex:1;text-transform:uppercase"><button type="button" class="btn-primary" style="width:80px" onclick="registerOperator()">+ Add</button></div></div><div id="existingOps" style="margin:8px 0"></div><div class="field" id="adminPassField" style="display:none"><label>Admin Pass</label><input id="adminPassInput" type="password"><button type="button" class="btn-sm btn-primary" style="margin-top:6px;width:100%" onclick="confirmDelete()">Confirm Delete</button></div><div id="regStatus" class="status" style="display:none"></div></div>
+
+<div id="contentLoc" class="tab-content"><div class="field"><label>Section *</label><select id="newLocSection"><option value="">-- Pilih Section --</option></select></div><div class="field"><label>ID</label><input id="newLocId" placeholder="LOC-013" style="text-transform:uppercase"></div><div class="field"><label>Name</label><input id="newLocName" placeholder="G3"></div><div class="field"><label>Desc</label><input id="newLocDesc" placeholder="Generator 3"></div><button type="button" class="btn-primary" style="background:#0b8f5a" onclick="registerLocation()">+ Add Location</button><div id="locList" style="margin-top:8px"></div><div id="locStatus" class="status" style="display:none"></div></div><div id="contentMeter" class="tab-content"><div class="field"><label>Location</label><select id="meterLocSelect"><option value="">-- Pilih --</option></select></div><div class="field"><label>Meter ID</label><input id="newMeterId" placeholder="MTR-013" style="text-transform:uppercase"></div><div class="field"><label>Meter Name</label><input id="newMeterName" placeholder="ION Meter"></div><div class="field"><label>Type</label><select id="newMeterType"><option>ION Meter</option><option>Control Panel</option><option>Gas Flow Meter</option><option>Sludge Flow Meter</option><option>Gas Analyzer</option><option>Level Meter</option><option>Flowmeter</option></select></div><button type="button" class="btn-primary" style="background:#7c3aed" onclick="registerMeter()">+ Add Meter</button><div id="meterList" style="margin-top:8px"></div><div id="meterStatus" class="status" style="display:none"></div></div><div id="contentPage" class="tab-content"><div class="field"><label>Meter</label><select id="pageMeterSelect" onchange="refreshPageList()"><option value="">-- Pilih Meter --</option></select></div><div class="field"><label>Page No</label><input id="newPageNo" type="number"></div><div class="field"><label>Page Name</label><select id="newPageName"><option>Energy</option><option>Power</option><option>Level</option><option>Sludge Flow</option><option>Gas Flow</option><option>Gas Analyzer</option><option>Control Panel</option><option>Status</option></select></div><button type="button" class="btn-primary" style="background:#ea580c" onclick="registerPage()">+ Add Page</button><div id="pageList" style="margin-top:8px"></div><div id="pageStatus" class="status" style="display:none"></div></div><div id="contentParams" class="tab-content"><div class="field"><label>Meter</label><select id="paramMeterSelect" onchange="refreshParamPageSelect()"><option value="">-- Pilih Meter --</option></select></div><div class="field"><label>Page</label><select id="paramPageSelect" onchange="refreshParamsList()"><option value="">-- Pilih Page --</option></select></div><div class="field"><label>Parameter</label><select id="newParamName"><option>Flow Rate</option><option>Totalizer</option><option>Energy kWh</option><option>Power kW</option><option>Level %</option><option>CH4 %</option><option>H2S ppm</option></select></div><div class="field"><label>Unit</label><select id="newParamUnit"><option>m3/h</option><option>m3</option><option>kWh</option><option>kW</option><option>%</option><option>ppm</option></select></div><button type="button" class="btn-primary" style="background:#0891b2" onclick="addParameter()">+ Add Parameter</button><div id="paramsList" style="margin-top:8px"></div><div id="paramStatus" class="status" style="display:none"></div></div></div></div>
+
+<div id="editorOverlay" class="editor-overlay">
+  <div class="editor-top" id="editorTop" style="overflow:hidden;touch-action:none;position:relative;background:#000;display:flex;align-items:center;justify-content:center">
+    <div class="editor-top-bar" style="position:absolute;top:0;left:0;right:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:8px;background:linear-gradient(to bottom, rgba(0,0,0,.8), transparent)">
+      <button type="button" onclick="closeEditor()" style="background:rgba(255,255,255,.95);color:#000;padding:6px 12px;font-weight:800;border-radius:8px;border:0">✕ Close</button>
+      <div style="color:#fff;font-size:30px;font-weight:900" id="editorTitle">Photo</div>
+      <div style="display:flex;gap:6px">
+        <button type="button" onclick="prevPhoto()" style="background:rgba(255,255,255,.9);color:#000;padding:6px 10px;border-radius:8px;border:0">‹</button>
+        <button type="button" onclick="nextPhoto()" style="background:rgba(255,255,255,.9);color:#000;padding:6px 10px;border-radius:8px;border:0">›</button>
+      </div>
+    </div>
+    <!-- HINT ZOOM -->
+    <div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.65);color:#fff;padding:4px 12px;border-radius:20px;font-size:20px;font-weight:900;z-index:9;pointer-events:none">DOUBLE TAP = ZOOM 4X • SERET UNTUK PAN</div>
+    <img id="editorImg" src="" draggable="false" style="max-width:100%;max-height:100%;object-fit:contain;transform-origin:center center;transition:transform 0.15s ease;will-change:transform;touch-action:none">
+  </div>
+  <div class="editor-mid" id="editorMid"></div>
+  <div class="editor-bottom">
+    <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-shrink:0">
+      <div style="font-size:20px;font-weight:900">⌨️ KEYPAD <span id="sectionColorDot" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#0b8f5a;margin-left:6px"></span></div>
+      <div style="font-size:19px;font-weight:900" id="focusedLabel">Tap field dulu</div>
+    </div>
+    <div class="keypad-grid">
+      <button type="button" class="keypad-btn" style="font-size:50px!important" onclick="keypadPress('7')">7</button>
+      <button type="button" class="keypad-btn" onclick="keypadPress('8')">8</button>
+      <button type="button" class="keypad-btn" onclick="keypadPress('9')">9</button>
+      <button type="button" class="keypad-btn action" onclick="keypadPress('-')">−</button>
+      <button type="button" class="keypad-btn" onclick="keypadPress('4')">4</button>
+      <button type="button" class="keypad-btn" onclick="keypadPress('5')">5</button>
+      <button type="button" class="keypad-btn" onclick="keypadPress('6')">6</button>
+      <button type="button" class="keypad-btn action" onclick="keypadPrev()">▲</button>
+      <button type="button" class="keypad-btn" onclick="keypadPress('1')">1</button>
+      <button type="button" class="keypad-btn" onclick="keypadPress('2')">2</button>
+      <button type="button" class="keypad-btn" onclick="keypadPress('3')">3</button>
+      <button type="button" class="keypad-btn action" onclick="keypadNext()">▼</button>
+      <button type="button" class="keypad-btn action" onclick="keypadPress('C')">⌫</button>
+      <button type="button" class="keypad-btn" onclick="keypadPress('0')">0</button>
+      <button type="button" class="keypad-btn" onclick="keypadPress('.')">.</button>
+      <button type="button" class="keypad-btn save" onclick="saveFromEditor()">✓</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* LOCK FINAL - BESAR RAPAT + ZOOM HIDUP */
+.editor-overlay{height:100dvh!important}
+.editor-bottom{height:44dvh!important;min-height:44dvh!important;background:#cbd5e1!important;z-index:999!important;pointer-events:auto!important}
+.keypad-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4,1fr)!important;
+  grid-auto-rows:72px!important;
+  gap:3px!important;
+  padding:3px!important;
+  padding-bottom:calc(6px + env(safe-area-inset-bottom))!important;
+  background:#cbd5e1!important;
+  pointer-events:auto!important;
+}
+.keypad-btn{
+  height:72px!important; min-height:72px!important;
+  font-size:68px!important; font-weight:900!important;
+  pointer-events:auto!important; touch-action:manipulation!important;
+}
+#editorTop{pointer-events:auto!important;touch-action:none!important;overflow:hidden!important;background:#000!important}
+#editorImg{pointer-events:auto!important;touch-action:none!important;will-change:transform!important;transform-origin:center center!important}
+</style>
+
+<script>
+// ZOOM 4X FINAL - LETAK DI VIEW BUKAN DI IMG
+let ezScale=1, ezX=0, ezY=0, ezLastX=0, ezLastY=0, ezDrag=false;
+const ezView = document.getElementById('editorTop');
+const ezImg = document.getElementById('editorImg');
+function ezApply(){ ezImg.style.transform=`translate(${ezX}px, ${ezY}px) scale(${ezScale})`; }
+function ezReset(){ ezScale=1; ezX=0; ezY=0; ezApply(); }
+
+// double tap + double click detect di VIEW
+let ezLastTap=0;
+ezView.addEventListener('touchend', (e)=>{
+  if(e.touches.length>0) return;
+  let now=Date.now();
+  if(now-ezLastTap<350){
+    e.preventDefault();
+    if(ezScale===1){ ezScale=4; } else { ezReset(); return; }
+    ezApply();
+  }
+  ezLastTap=now;
+});
+ezView.addEventListener('dblclick', (e)=>{
+  e.preventDefault();
+  if(ezScale===1){ ezScale=4; } else { ezReset(); return; }
+  ezApply();
+});
+
+// pan bila dah zoom
+ezView.addEventListener('touchstart', (e)=>{ if(ezScale>1 && e.touches.length===1){ ezDrag=true; ezLastX=e.touches[0].clientX-ezX; ezLastY=e.touches[0].clientY-ezY; } });
+ezView.addEventListener('touchmove', (e)=>{ if(ezDrag){ e.preventDefault(); ezX=e.touches[0].clientX-ezLastX; ezY=e.touches[0].clientY-ezLastY; ezApply(); } },{passive:false});
+ezView.addEventListener('touchend', ()=>{ ezDrag=false; });
+ezView.addEventListener('mousedown', (e)=>{ if(ezScale>1){ ezDrag=true; ezLastX=e.clientX-ezX; ezLastY=e.clientY-ezY; } });
+window.addEventListener('mousemove', (e)=>{ if(ezDrag){ ezX=e.clientX-ezLastX; ezY=e.clientY-ezLastY; ezApply(); } });
+window.addEventListener('mouseup', ()=>ezDrag=false);
+
+// reset bila tukar gambar
+let oldPrev=window.prevPhoto, oldNext=window.nextPhoto, oldClose=window.closeEditor;
+window.prevPhoto=function(){ ezReset(); if(oldPrev) oldPrev(); }
+window.nextPhoto=function(){ ezReset(); if(oldNext) oldNext(); }
+window.closeEditor=function(){ ezReset(); if(oldClose) oldClose(); }
+
+// pinch zoom
+let ezStartDist=0;
+ezView.addEventListener('touchstart', (e)=>{ if(e.touches.length===2){ ezStartDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY); } });
+ezView.addEventListener('touchmove', (e)=>{
+  if(e.touches.length===2){ e.preventDefault(); let d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY); let ns=ezScale*(d/ezStartDist); ezScale=Math.min(Math.max(ns,1),4); if(ezScale===1){ezX=0;ezY=0;} ezApply(); ezStartDist=d; }
+},{passive:false});
+</script>
+
+
+<header class="app-header" style="position:fixed!important; top:0!important; left:0!important; right:0!important; width:100%!important; height:120px!important; min-height:120px!important; z-index:1000!important; background:#fff!important; border-bottom:4px solid #1a4a8a!important; box-shadow:0 8px 28px rgba(0,0,0,.18)!important; display:flex!important; justify-content:space-between!important; align-items:center!important; padding:14px 18px!important; box-sizing:border-box!important;">
+<div style="display:flex;gap:12px;align-items:center">
+<img src="https://lh3.googleusercontent.com/d/1oU45Cd4ygBRnhscGklFJ0AzCkg8lLRUw" style="height:75px!important; width:auto!important; object-fit:contain!important;">
+<div style="font-weight:900!important; font-size:40px!important; color:#1a4a8a!important; line-height:1.1!important; letter-spacing:-0.5px!important;">Manual Meter Reading v11.5</div>
+</div>
+<div style="display:flex;align-items:center;justify-content:center">
+<div id="headerOperatorPhoto" title="Tap untuk ambil gambar operator" onclick="openOperatorCamera()" style="width: 100px; height: 100px;border-radius:50%;background:#eef5ff;border:3px solid #1a4a8a;display:flex;align-items:center;justify-content:center;font-size:42px;line-height:1;box-shadow:0 3px 10px rgba(0,0,0,.15);cursor:pointer;overflow:hidden;position:relative">👷</div>
+</div>
+</header>
+
+<input id="operatorPhotoInput" type="file" accept="image/*" capture="user" hidden onchange="handleOperatorPhoto(event)">
+<main class="container"><div id="status" class="status">Loading... </div>
+<section class="card" id="mainOperatorCard"><div style="font-weight:800;font-size:13px;display:flex;justify-content:space-between;align-items:center">👷 Operator<div style="display:flex;gap:6px;align-items:center"><button type="button" onclick="openHelpLegend()" style="height:34px;min-width:60px;padding:0 10px;border-radius:20px;border:1.5px solid #c4b5fd;background:#f5f3ff;color:#5b21b6;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;min-height:34px">📖 Help</button><button type="button" onclick="openSettings()" style="height:34px;min-width:60px;padding:0 10px;border-radius:20px;border:1.5px solid #cbd5e1;background:#0f172a;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;min-height:34px">⚙️ Setting</button><button type="button" onclick="openResetAdmin()" style="height:34px;min-width:60px;padding:0 10px;border-radius:20px;border:1.5px solid #fecaca;background:#fee2e2;color:#991b1b;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;min-height:34px">🔐 Reset</button><div id="liveStatus" class="live-online" style="height:34px;min-width:70px;padding:0 10px;border-radius:20px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;white-space:nowrap;min-height:34px">● ONLINE</div></div></div><div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;margin-top:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:10px;color:#64748b;font-weight:800">📦 SECTION</div><div id="autoSectionDisplay" style="font-size:16px;font-weight:900">-</div></div><div id="autoOperatorDisplay" style="background:#0f172a;color:#fff;padding:8px 14px;border-radius:12px;font-size:12px;font-weight:800">-</div></div></div></section>
+<section class="card"><div style="font-weight:800;margin-bottom:8px;font-size:14px">📸 Upload Photo Meter ( Max 50 )</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button type="button" class="btn-camera" onclick="document.getElementById('cameraInput').click()">📷 Camera</button><button type="button" class="btn-gallery" onclick="document.getElementById('galleryInput').click()">🖼️ Gallery</button></div><input id="cameraInput" type="file" accept="image/*" capture="environment" hidden onchange="handlePhotoInput(event)"><input id="galleryInput" type="file" accept="image/*" multiple hidden onchange="handlePhotoInput(event)"><div id="photoCount" style="margin-top:8px;font-weight:800;font-size:12px">0 / 50</div></section>
+<section class="card"><div style="font-weight:800;margin-bottom:8px;font-size:14px">📋 List Photo (Tap Edit untuk isi bacaan)</div><div id="photoVertical" class="photo-vertical"></div></section>
+<section class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button type="button" style="background:#0b8f5a;color:#fff;padding:16px;font-weight:800;border-radius:12px;font-size:14px" onclick="saveOfflineOnly()">💾 SAVE OFFLINE</button><button type="button" id="btnSubmitAll" style="background:#0066a1;color:#fff;padding:16px;font-weight:800;border-radius:12px;font-size:14px" onclick="submitAllPhotos()">🚀 SUBMIT ONLINE</button></div><div id="queueInfo" style="margin-top:10px;font-size:12px;display:none;font-weight:700"></div><button type="button" onclick="syncOfflineQueue()" style="margin-top:10px;background:#e0f2fe;border:1.5px solid #0ea5e9;width:100%;padding:12px;border-radius:12px;font-weight:800;color:#0c4a6e">🔄 Sync Offline Queue</button></section><section class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-weight:800;font-size:14px">📜 Log Activity</div><div style="display:flex;gap:6px"><button type="button" onclick="renderReadingLogs()" style="background:#dcfce7;font-size:11px;padding:8px 12px;font-weight:800">🔄 Refresh</button><button type="button" onclick="exportReadingLog()" style="background:#e0f2fe;font-size:11px;padding:8px 12px;font-weight:800">📤 Export</button></div></div><div id="dynamicLogFilterBar" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap"></div><div id="logList" style="max-height:600px;overflow-y:auto;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:8px"></div><div id="logCount" style="margin-top:8px;font-size:11px;color:#94a3b8">0 bacaan</div></section></main>
+
+<script>
+let photos=[],locations=[],operators=[],allMeters=[],allPages=[],allParams=[],allSections=[],activityLogs=[];
+let currentEditIndex=-1,currentFocusedInput=null,lastTap=0,deleteTarget=null,currentOperatorSection='',currentLogFilter='ALL';
+let scale=1,posX=0,posY=0,startX=0,startY=0,isDragging=false;
+let isFirstLoad=true,lastLogCount=0;
+let _isSubmitting=false;
+const OFFLINE_DB='PhotoReadingScannerOfflineDB',OFFLINE_VER=10;
+const STORAGE_KEY_OP='v75_active_operator',STORAGE_KEY_SEC='v75_active_section',STORAGE_KEY_OPID='v75_active_operatorId';
+function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(OFFLINE_DB,OFFLINE_VER);r.onupgradeneeded=e=>{const db=e.target.result;['masterLocations','masterOperators','masterMeters','masterPages','masterParameters','masterSections','offlineQueue','activityLog'].forEach(n=>{if(!db.objectStoreNames.contains(n))db.createObjectStore(n);});};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function saveBundle(b){try{const db=await openDB();const tx=db.transaction(['masterLocations','masterOperators','masterMeters','masterPages','masterParameters','masterSections'],'readwrite');tx.objectStore('masterLocations').put({locations:b.locations||[]},'activeLocations');tx.objectStore('masterOperators').put({operators:b.operators||[]},'activeOperators');tx.objectStore('masterMeters').put({meters:b.meters||[]},'allMeters');tx.objectStore('masterPages').put({pages:b.meterPages||b.pages||[]},'allPages');tx.objectStore('masterParameters').put({parameters:b.parameters||[]},'allParameters');tx.objectStore('masterSections').put({sections:b.sections||[]},'allSections');await new Promise(r=>{tx.oncomplete=r;});db.close();}catch(e){}}
+async function loadCache(){try{const db=await openDB();const get=(s,k)=>new Promise(res=>{try{const tx=db.transaction(s,'readonly');const rq=tx.objectStore(s).get(k);rq.onsuccess=()=>res(rq.result);rq.onerror=()=>res(null);}catch{res(null);}});const l=await get('masterLocations','activeLocations');const o=await get('masterOperators','activeOperators');const m=await get('masterMeters','allMeters');const p=await get('masterPages','allPages');const pr=await get('masterParameters','allParameters');const sec=await get('masterSections','allSections');const lg=await get('activityLog','logs');db.close();return{locations:l?.locations||[],operators:o?.operators||[],meters:m?.meters||[],pages:p?.pages||[],parameters:pr?.parameters||[],sections:sec?.sections||[],logs:lg?.logs||[]};}catch(e){return{locations:[],operators:[],meters:[],pages:[],parameters:[],sections:[],logs:[]}}}
+async function saveLogs(){try{const db=await openDB();const tx=db.transaction('activityLog','readwrite');tx.objectStore('activityLog').put({logs:activityLogs},'logs');await new Promise(r=>{tx.oncomplete=r;});db.close();}catch(e){}}
+async function saveToQueue(payload){const db=await openDB();return new Promise(res=>{const tx=db.transaction('offlineQueue','readwrite');const key='queue_'+Date.now();tx.objectStore('offlineQueue').put({key:key,payload:payload},key);tx.oncomplete=()=>{db.close();res(true);};});}
+async function loadQueue(){const db=await openDB();return new Promise(res=>{const tx=db.transaction('offlineQueue','readonly');const rq=tx.objectStore('offlineQueue').getAll();rq.onsuccess=()=>{db.close();res(rq.result||[]);};rq.onerror=()=>{db.close();res([]);};});}
+async function clearQueueItem(k){const db=await openDB();return new Promise(res=>{const tx=db.transaction('offlineQueue','readwrite');tx.objectStore('offlineQueue').delete(k);tx.oncomplete=()=>{db.close();res(true);};});}
+function setStatus(m,t){const el=document.getElementById('status');if(!el)return;el.textContent=m;el.className='status';if(t==='success')el.classList.add('success');if(t==='error')el.classList.add('error');}
+function getMySection(){let sec=(localStorage.getItem(STORAGE_KEY_SEC)||currentOperatorSection||'').toUpperCase();let opName=(localStorage.getItem(STORAGE_KEY_OP)||'').toUpperCase();if(opName.includes('ADMIN')) return 'ALL';if(!sec) return 'ALL';return sec;}
+
+function openOperatorCamera(){
+  const inp=document.getElementById('operatorPhotoInput');
+  if(inp) inp.click();
+}
+
+
+async function cropOperatorPhotoToCircle(dataUrl){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=function(){
+      const size=600;
+      const canvas=document.createElement('canvas');
+      canvas.width=size;
+      canvas.height=size;
+      const ctx=canvas.getContext('2d');
+
+      // True center-crop to a square.
+      const side=Math.min(img.naturalWidth,img.naturalHeight);
+      const sx=(img.naturalWidth-side)/2;
+      const sy=(img.naturalHeight-side)/2;
+
+      // Transparent outside the circle.
+      ctx.clearRect(0,0,size,size);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size/2,size/2,size/2,0,Math.PI*2);
+      ctx.closePath();
+      ctx.clip();
+
+      ctx.drawImage(img,sx,sy,side,side,0,0,size,size);
+      ctx.restore();
+
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror=()=>reject(new Error('Image tidak dapat dibaca'));
+    img.src=dataUrl;
+  });
+}
+
+
+function handleOperatorPhoto(e){
+  const file=(e.target.files||[])[0];
+  if(!file)return;
+  if(!file.type.startsWith('image/')){
+    alert('Sila pilih gambar.');
+    e.target.value='';
+    return;
+  }
+
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    cropOperatorPhotoToCircle(ev.target.result).then(dataUrl=>{
+      localStorage.setItem('v82_operator_photo',dataUrl);
+      applyOperatorPhoto(dataUrl);
+      setStatus('📸 Photo operator berjaya diambil','success');
+    }).catch(err=>{
+      console.error(err);
+      setStatus('❌ Gagal crop photo operator','error');
+    });
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+function applyOperatorPhoto(dataUrl){
+  const el=document.getElementById('headerOperatorPhoto');
+  if(!el)return;
+  if(dataUrl){
+    el.innerHTML='<img src="'+dataUrl+'" alt="Operator" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;border-radius:50%;clip-path:circle(50% at 50% 50%)">';
+  }else{
+    el.innerHTML='👷';
+  }
+}
+
+function loadOperatorPhoto(){
+  const saved=localStorage.getItem('v82_operator_photo');
+  if(saved) applyOperatorPhoto(saved);
+}
+
+function checkFirstTime(){const savedOp=localStorage.getItem(STORAGE_KEY_OP);const savedSec=localStorage.getItem(STORAGE_KEY_SEC);if(!savedOp||!savedSec){document.getElementById('firstTimeOverlay').style.display='flex';return false;}currentOperatorSection=savedSec;document.body.setAttribute('data-section',savedSec);const dot=document.getElementById('sectionColorDot');if(dot){dot.style.background=savedSec==='GAS'?'#f59e0b':savedSec==='SOLID'?'#10b981':'#0ea5e9';}document.getElementById('autoSectionDisplay').textContent=savedSec;document.getElementById('autoOperatorDisplay').textContent=savedOp;setTimeout(()=>{renderReadingLogs();},500);return true;}
+function ftFilterOperator(){const sec=document.getElementById('ftSection').value;const opSel=document.getElementById('ftOperator');if(!sec){opSel.innerHTML='<option value="">-- Pilih Section dulu --</option>';return;}const filtered=operators.filter(op=>(op.section||'').toUpperCase()===sec);opSel.innerHTML='<option value="">-- Pilih ('+filtered.length+') --</option>';filtered.forEach(op=>{const o=document.createElement('option');o.value=op.operatorId||op.operatorName;o.textContent=op.operatorName+' ['+sec+']';o.dataset.name=op.operatorName;o.dataset.id=op.operatorId||op.operatorName;opSel.appendChild(o);});}
+function saveFirstTimeSetup(){const sec=document.getElementById('ftSection').value;const opEl=document.getElementById('ftOperator');if(!sec||opEl.selectedIndex<=0){const st=document.getElementById('ftStatus');st.style.display='block';st.textContent='Pilih Section & Operator';st.className='status error';return;}const opt=opEl.options[opEl.selectedIndex];localStorage.setItem(STORAGE_KEY_SEC,sec);document.body.setAttribute('data-section',sec);localStorage.setItem(STORAGE_KEY_OP,opt.dataset.name);localStorage.setItem(STORAGE_KEY_OPID,opt.dataset.id);currentOperatorSection=sec;document.getElementById('firstTimeOverlay').style.display='none';document.getElementById('autoSectionDisplay').textContent=sec;document.getElementById('autoOperatorDisplay').textContent=opt.dataset.name;setStatus('Welcome '+opt.dataset.name+' ['+sec+'] - SYNC ON','success');renderVertical();renderReadingLogs();}
+function showCurrentSetupInfo(){const sec=localStorage.getItem(STORAGE_KEY_SEC)||'-';const op=localStorage.getItem(STORAGE_KEY_OP)||'-';alert('Current Setup:\nSection: '+sec+'\nOperator: '+op+'\n\nBatch Rule: 1 batch = 1x submit OR 1 jam gap');}
+function openResetAdmin(){document.getElementById('resetAdminPass').value='';document.getElementById('resetAdminStatus').style.display='none';document.getElementById('resetAdminModal').classList.add('active');}
+function cancelResetAdmin(){document.getElementById('resetAdminModal').classList.remove('active');}
+function verifyAdminPass(pass,onSuccess,onFail){if(typeof google!=='undefined'&&google.script&&google.script.run){google.script.run.withSuccessHandler(res=>{if(res&&res.success){onSuccess();}else{onFail(res?res.message:'Password salah!');}}).withFailureHandler(()=>{if(String(pass).trim()===''){onSuccess();}else{onFail('Offline - Salah!');}}).verifyAdminPassword(pass);}else{if(String(pass).trim()===''){onSuccess();}else{onFail('Offline');}}}
+function confirmResetAdmin(){const pass=document.getElementById('resetAdminPass').value.trim();const stat=document.getElementById('resetAdminStatus');if(!pass){stat.style.display='block';stat.textContent='Masukkan!';stat.className='status error';return;}stat.style.display='block';stat.textContent='Verifying...';stat.className='status';verifyAdminPass(pass,()=>{stat.textContent='✅ Admin OK - Resetting...';stat.className='status success';setTimeout(()=>doReset(),600);},(msg)=>{stat.textContent='❌ '+msg;stat.className='status error';});}
+function doReset(){localStorage.removeItem(STORAGE_KEY_OP);localStorage.removeItem(STORAGE_KEY_SEC);localStorage.removeItem(STORAGE_KEY_OPID);currentOperatorSection='';document.getElementById('resetAdminModal').classList.remove('active');document.getElementById('autoSectionDisplay').textContent='-';document.getElementById('autoOperatorDisplay').textContent='-';document.getElementById('firstTimeOverlay').style.display='flex';ftFilterOperator();setStatus('🔐 Reset OK','error');}
+function compressImage(file,maxW=900,quality=0.65){return new Promise((res,rej)=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{let w=img.width,h=img.height;if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);canvas.toBlob(blob=>{URL.revokeObjectURL(url);const newFile=new File([blob],file.name,{type:'image/jpeg'});const thumbUrl=URL.createObjectURL(blob);res({file:newFile,thumbUrl:thumbUrl,compSize:blob.size});},'image/jpeg',quality);};img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('load'));};img.src=url;});}
+async function handlePhotoInput(e){const savedSec=localStorage.getItem(STORAGE_KEY_SEC);const files=Array.from(e.target.files||[]);if(!files.length)return;if(!savedSec){alert('⚠️ Setup Operator dulu!');document.getElementById('firstTimeOverlay').style.display='flex';return;}if(photos.length>=50){alert('Maximum 50 photos!');return;}document.getElementById('uploadOverlay').style.display='flex';for(let idx=0;idx<files.length;idx++){if(photos.length>=50)break;document.getElementById('uploadMessage').textContent='Compress '+(idx+1)+'/'+files.length;try{const comp=await compressImage(files[idx],900,0.65);photos.push({id:'P'+Date.now()+idx,url:comp.thumbUrl,file:comp.file,sectionId:savedSec,locationId:'',meterId:'',pageNo:null,readings:[],readingSaved:false,compSize:comp.compSize});}catch{photos.push({id:'P'+Date.now()+idx,url:URL.createObjectURL(files[idx]),file:files[idx],sectionId:savedSec,locationId:'',meterId:'',pageNo:null,readings:[],readingSaved:false,compSize:files[idx].size});}}document.getElementById('uploadOverlay').style.display='none';e.target.value='';renderVertical();}
+function deletePhoto(idx){if(idx<0||idx>=photos.length)return;if(!confirm('Remove Photo '+(idx+1)+'?'))return;try{URL.revokeObjectURL(photos[idx].url);}catch(e){}photos.splice(idx,1);if(currentEditIndex===idx){closeEditor();}else if(currentEditIndex>idx){currentEditIndex--;}renderVertical();setStatus('🗑️ Photo '+(idx+1)+' removed','success');}
+function renderVertical(){
+  const wrap=document.getElementById('photoVertical');
+  if(!photos.length){
+    wrap.innerHTML=`<div style="border:2.5px dashed #0b8bbd;border-radius:18px;padding:24px 16px;text-align:center;background:#fff;cursor:pointer" onclick="document.getElementById('cameraInput').click()"><div style="position:relative;width:110px;height:110px;margin:0 auto 14px"><div style="position:absolute;inset:0;border-radius:50%;animation:spinDash 3s linear infinite"><div style="position:absolute;inset:0;border:2px dashed #7cc4e6;border-radius:50%"></div></div><div style="position:absolute;inset:7px;background:#e6f4ff;border:2px solid #b8e0f6;border-radius:50%;display:flex;align-items:center;justify-content:center;animation:pulseCam 2s ease-in-out infinite"><svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="#0b8bbd" stroke-width="1.8"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h2.2a1 1 0 0 0.8-.4l.4-.6a1 1 0 0 1.8-.4H13a1 1 0 0 1.8.4l.4.6a1 1 0 0 0.8.4H17.5A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z"/><circle cx="12" cy="13" r="4.2"/></svg></div></div><div style="color:#0b8bbd;font-size:14px;font-weight:700;animation:floatText 2s ease-in-out infinite">Upload photo here & edit</div><div style="color:#8ec3da;font-size:12px;margin-top:4px;font-weight:600">Tap 📸 Camera / Gallery</div></div>`;
+    document.getElementById('photoCount').textContent='0 / 50';
+    return;
+  }
+  wrap.innerHTML='';
+  photos.forEach((p,i)=>{
+    const kb=Math.round((p.compSize||0)/1024);
+    const isValid=p.readingSaved?'✓ Valid':(!p.locationId||!p.meterId||p.pageNo===null?'⚠️ Not complete':'');
+    const card=document.createElement('div');
+    card.className='photo-card-inline'+(p.readingSaved?' done':'');
+    card.innerHTML='<img src="'+p.url+'"><div style="flex:1"><div style="font-weight:800;font-size:13px">Photo '+(i+1)+' • '+kb+'KB '+(p.readingSaved?'✓':'')+' <span style="background:'+(p.sectionId==='GAS'?'#fef3c7':p.sectionId==='SOLID'?'#dcfce7':'#e0f2fe')+';padding:3px 7px;border-radius:8px;font-size:10px;font-weight:800">'+(p.sectionId||'NO-SEC')+'</span></div><div style="font-size:11px;color:#64748b;margin-top:3px">'+(p.locationId? (locations.find(l=>String(l.locationId)===String(p.locationId))?.locationName||p.locationId):'No loc')+' '+(p.meterId?'|'+p.meterId:'')+' '+(p.pageNo?'|P'+p.pageNo:'')+' <span style="color:'+(p.readingSaved?'#0b8f5a':'#dc2626')+';font-weight:700">'+isValid+'</span></div></div><div style="display:flex;gap:6px;flex-direction:column"><button type="button" style="background:#0f172a;color:#fff;padding:10px 14px;font-size:11px;border-radius:10px;min-height:36px" onclick="openEditor('+i+')">'+(p.readingSaved?'✏️ Edit':'📝 Edit')+'</button><button type="button" style="background:#ef4444;color:#fff;padding:7px 12px;font-size:11px;border-radius:10px;min-height:32px" onclick="deletePhoto('+i+')">🗑️</button></div>';
+    wrap.appendChild(card);
+  });
+  document.getElementById('photoCount').textContent=photos.length+' / 50 • '+(currentOperatorSection||localStorage.getItem(STORAGE_KEY_SEC)||'');
+}
+function openEditor(index){currentEditIndex=index;scale=1;posX=0;posY=0;isDragging=false;const p=photos[index];const mainSec=localStorage.getItem(STORAGE_KEY_SEC)||currentOperatorSection;if(mainSec){p.sectionId=mainSec;}const img=document.getElementById('editorImg');img.src=p.url;img.style.transform='translate('+posX+'px,'+posY+'px) scale('+scale+')';document.getElementById('editorTitle').textContent='Photo '+(index+1)+' / '+photos.length+' ['+p.sectionId+']';renderEditorMid();document.getElementById('editorOverlay').style.display='flex';document.body.style.overflow='hidden';}
+function closeEditor(){document.getElementById('editorOverlay').style.display='none';document.body.style.overflow='';currentFocusedInput=null;scale=1;posX=0;posY=0;isDragging=false;renderVertical();}
+function prevPhoto(){if(currentEditIndex>0){currentEditIndex--;openEditor(currentEditIndex);}}
+function nextPhoto(){if(currentEditIndex<photos.length-1){currentEditIndex++;openEditor(currentEditIndex);}}
+function getMetersByLoc(locId){if(!locId)return[];return allMeters.filter(m=>String(m.locationId)===String(locId));}
+function getPagesByMeter(mId){if(!mId)return[];return allPages.filter(p=>String(p.meterId)===String(mId));}
+function getParams(mId,pageNo){if(!mId||pageNo===null)return[];return allParams.filter(p=>String(p.meterId)===String(mId)&&Number(p.pageNo)===Number(pageNo));}
+function getUsedPages(){const s=new Set();photos.forEach(p=>{if(p.readingSaved&&p.meterId&&p.pageNo!==null)s.add(String(p.meterId)+'|'+String(p.pageNo));});return s;}
+function renderEditorMid(){const p=photos[currentEditIndex];const mid=document.getElementById('editorMid');const meters=getMetersByLoc(p.locationId);const pages=getPagesByMeter(p.meterId);const used=getUsedPages();let pageOptions='<option value="">-- Pilih Page --</option>';pages.forEach(pg=>{const key=String(p.meterId)+'|'+String(pg.pageNo);const isUsed=used.has(key);const isOwn=String(p.pageNo)===String(pg.pageNo);if(isUsed&&!isOwn) pageOptions+='<option value="'+pg.pageNo+'" disabled>Page '+pg.pageNo+' (✓ Used)</option>';else pageOptions+='<option value="'+pg.pageNo+'" '+(isOwn?'selected':'')+'>Page '+pg.pageNo+' - '+pg.pageName+'</option>';});const mainSec=p.sectionId||currentOperatorSection||localStorage.getItem(STORAGE_KEY_SEC);const secColor=mainSec==='GAS'?'#fef3c7':mainSec==='SOLID'?'#dcfce7':'#e0f2fe';let locsFiltered=locations;if(mainSec)locsFiltered=locations.filter(l=>String(l.section)===String(mainSec));let html='<div style="background:'+secColor+';border:1px solid #cbd5e1;border-radius:10px;padding:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:36px;color:#64748b;font-weight:900">📦 SECTION AUTO</div><div style="font-size:50px;font-weight:900">🔒 '+(mainSec||'PLEASE SELECT')+'</div></div><div style="font-size:24px;background:#0f172a;color:#fff;padding:6px 10px;border-radius:12px">'+(localStorage.getItem(STORAGE_KEY_OP)||'')+'</div></div><div class="field"><label style="font-size:30px!important">🌍 LOCATION * ('+locsFiltered.length+' loc)</label><select id="edit_loc" onchange="editLocChanged()"><option value="">-- Pilih Location '+mainSec+' --</option>'+locsFiltered.map(l=>'<option value="'+l.locationId+'" '+(String(p.locationId)===String(l.locationId)?'selected':'')+'>'+l.locationName+' ('+l.locationId+')</option>').join('')+'</select></div>'+(p.locationId?'<div class="field"><label style="font-size:30px!important">🔧 METER *</label><select id="edit_meter" onchange="editMeterChanged()"><option value="">-- Meter --</option>'+meters.map(m=>'<option value="'+m.meterId+'" '+(String(p.meterId)===String(m.meterId)?'selected':'')+'>'+m.meterName+'</option>').join('')+'</select></div>':'')+(p.meterId?'<div class="field"><label style="font-size:30px!important">📄 PAGE *</label><select id="edit_page" onchange="editPageChanged()">'+pageOptions+'</select></div>':'');if(p.meterId&&p.pageNo!==null){const params=getParams(p.meterId,p.pageNo);if(params.length){html+='<div style="margin-top:12px"><div style="font-weight:900;font-size:30px;margin-bottom:8px">📝 READING * ('+params.length+')</div>';params.forEach((pr)=>{const ex=p.readings.find(r=>String(r.parameterId)===String(pr.parameterId));html+='<div class="reading-row" id="row_'+pr.parameterId+'" onclick="focusInput(\''+pr.parameterId+'\')"><div style="flex:1"><div style="font-size:28px;font-weight:900">'+pr.parameterName+' <span style="color:#dc2626">*</span> <span style="color:#64748b">('+pr.unit+')</span></div></div><input id="edit_read_'+pr.parameterId+'" data-pid="'+pr.parameterId+'" data-pname="'+pr.parameterName+'" data-unit="'+pr.unit+'" type="text" inputmode="none" readonly value="'+(ex?ex.reading:'')+'" placeholder="0" style="width:260px;text-align:right;font-weight:900;font-size:46px;padding:12px;background:#f8fafc"></div>';});html+='</div>';}}html+='<div style="margin-top:16px"><button type="button" onclick="deletePhotoFromEditor()" style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;width:100%;padding:25px;border-radius:10px;font-weight:900;font-size:18px">🗑️ Removed Photo Ni</button></div>';mid.innerHTML=html;}
+function deletePhotoFromEditor(){if(currentEditIndex<0)return;if(confirm('Remove Photo '+(currentEditIndex+1)+' ni?')){deletePhoto(currentEditIndex);closeEditor();}}
+function editLocChanged(){const v=document.getElementById('edit_loc').value;const p=photos[currentEditIndex];p.locationId=v;p.meterId='';p.pageNo=null;p.readings=[];p.readingSaved=false;renderEditorMid();}
+function editMeterChanged(){const v=document.getElementById('edit_meter').value;const p=photos[currentEditIndex];p.meterId=v;p.pageNo=null;p.readings=[];p.readingSaved=false;renderEditorMid();}
+function editPageChanged(){const v=document.getElementById('edit_page').value;const p=photos[currentEditIndex];if(v===''){p.pageNo=null;p.readings=[];p.readingSaved=false;renderEditorMid();return;}p.pageNo=Number(v);p.readings=[];p.readingSaved=false;renderEditorMid();setTimeout(()=>{const first=document.querySelector('[id^="edit_read_"]');if(first)focusInput(first.dataset.pid);},200);}
+function focusInput(pid){document.querySelectorAll('.reading-row').forEach(r=>r.classList.remove('active'));document.querySelectorAll('[id^="edit_read_"]').forEach(inp=>inp.classList.remove('input-focus'));const row=document.getElementById('row_'+pid);const inp=document.getElementById('edit_read_'+pid);if(row)row.classList.add('active');if(inp){inp.classList.add('input-focus');currentFocusedInput=inp;document.getElementById('focusedLabel').textContent=inp.dataset.pname+' ('+inp.dataset.unit+')';}}
+function keypadPress(val){if(!currentFocusedInput){const f=document.querySelector('[id^="edit_read_"]');if(f){focusInput(f.dataset.pid);}else{const lbl=document.getElementById('focusedLabel');if(lbl)lbl.textContent='⚠️ Tap field dulu!';return;}}let cur=currentFocusedInput.value||'';if(val==='C'){currentFocusedInput.value=cur.slice(0,-1);return;}if(val==='.'&&cur.includes('.'))return;if(val==='-'&&cur.includes('-'))return;if(val==='-'&&cur.length>0){return;}currentFocusedInput.value=cur+val;currentFocusedInput.classList.remove('validation-error');}
+function keypadNext(){const inputs=Array.from(document.querySelectorAll('[id^="edit_read_"]'));if(!inputs.length)return;let idx=inputs.indexOf(currentFocusedInput);idx=(idx+1)%inputs.length;focusInput(inputs[idx].dataset.pid);}
+function keypadPrev(){const inputs=Array.from(document.querySelectorAll('[id^="edit_read_"]'));if(!inputs.length)return;let idx=inputs.indexOf(currentFocusedInput);idx=(idx-1+inputs.length)%inputs.length;focusInput(inputs[idx].dataset.pid);}
+function saveFromEditor(){const p=photos[currentEditIndex];const params=getParams(p.meterId,p.pageNo);if(!p.sectionId){alert('⚠️ Sila pilih Section!');return;}if(!p.locationId){alert('⚠️ Sila pilih Location!');return;}if(!p.meterId){alert('⚠️ Sila pilih Meter!');return;}if(p.pageNo===null||p.pageNo===''){alert('⚠️ Sila pilih Page!');return;}let duplicate=false;photos.forEach((other,idx)=>{if(idx!==currentEditIndex&&other.readingSaved){const key=String(other.meterId)+'|'+String(other.pageNo);if(key===String(p.meterId)+'|'+String(p.pageNo))duplicate=true;}});if(duplicate){alert('⚠️ Page sudah digunakan!');return;}const readings=[];let ok=true;let firstEmpty=null;params.forEach(pr=>{const inp=document.getElementById('edit_read_'+pr.parameterId);if(!inp||inp.value.trim()===''){ok=false;if(inp){inp.classList.add('validation-error');if(!firstEmpty)firstEmpty=pr.parameterName;}}else{readings.push({parameterId:pr.parameterId,parameter:pr.parameterName,reading:inp.value.trim(),unit:pr.unit});}});if(!ok){alert('⚠️ Reading wajib isi semua! Kosong: '+firstEmpty);return;}p.readings=readings;p.readingSaved=true;addReadingLog(p.meterId,p.pageNo,allPages.find(pg=>String(pg.meterId)===String(p.meterId)&&Number(pg.pageNo)===Number(p.pageNo))?.pageName||'',readings);setStatus('✓ Photo '+(currentEditIndex+1)+' Saved ['+p.sectionId+'] - Page '+p.pageNo,'success');if(currentEditIndex<photos.length-1){if(confirm('Saved! Next photo?')){currentEditIndex++;openEditor(currentEditIndex);}else{closeEditor();}}else{closeEditor();}}
+function fileToBase64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>{res({base64:e.target.result.split(',')[1],mimeType:f.type||'image/jpeg',fileName:f.name||'photo.jpg'});};r.onerror=()=>rej(new Error('Fail'));r.readAsDataURL(f);});}
+async function saveOfflineOnly(){const savedOp=localStorage.getItem(STORAGE_KEY_OP);const savedOpId=localStorage.getItem(STORAGE_KEY_OPID)||savedOp;const savedSec=localStorage.getItem(STORAGE_KEY_SEC);if(!savedOp){alert('⚠️ Setup Operator dulu!');return;}const toSubmit=photos.filter(p=>p.readingSaved);if(!toSubmit.length){alert('⚠️ Tiada yang Valid');return;}if(!confirm('Save '+toSubmit.length+' photos OFFLINE? Operator '+savedOp+' ['+savedSec+']'))return;document.getElementById('uploadOverlay').style.display='flex';try{const payloadPhotos=[];for(let i=0;i<toSubmit.length;i++){document.getElementById('uploadMessage').textContent='Preparing '+(i+1)+'/'+toSubmit.length;const img=await fileToBase64(toSubmit[i].file);payloadPhotos.push({photoIndex:i+1,fileName:img.fileName,mimeType:img.mimeType,base64:img.base64,sectionId:toSubmit[i].sectionId,locationId:toSubmit[i].locationId,meterId:toSubmit[i].meterId,pageNo:toSubmit[i].pageNo,readings:toSubmit[i].readings});}const final={operatorId:savedOpId,operatorName:savedOp,operatorSection:savedSec,photos:payloadPhotos,timestamp:new Date().toISOString()};await saveToQueue(final);document.getElementById('uploadOverlay').style.display='none';setStatus('💾 Offline saved '+toSubmit.length+' photos ['+savedSec+'] '+savedOp,'success');photos=photos.filter(p=>!p.readingSaved);renderVertical();await updateQueueInfo();}catch(e){document.getElementById('uploadOverlay').style.display='none';setStatus('Offline save error: '+e.message,'error');}}
+async function submitAllPhotos(){
+ if(_isSubmitting){alert('⏳ Sedang hantar...');return;}
+ const savedOp=localStorage.getItem(STORAGE_KEY_OP);
+ const savedOpId=localStorage.getItem(STORAGE_KEY_OPID)||savedOp;
+ const savedSec=localStorage.getItem(STORAGE_KEY_SEC);
+ if(!savedOp){alert('⚠️ Setup Operator dulu!');return;}
+ const toSubmit=photos.filter(p=>p.readingSaved);
+ if(!toSubmit.length){alert('⚠️ Tiada Valid');return;}
+ if(!navigator.onLine || typeof google==='undefined' ||!google.script ||!google.script.run){
+   if(confirm('📴 Anda OFFLINE - Nak simpan Offline Queue ('+toSubmit.length+')?')){await saveOfflineOnly();}
+   return;
+ }
+ if(!confirm('SUBMIT '+toSubmit.length+' ONLINE? ['+savedSec+'] '+savedOp))return;
+ _isSubmitting=true;
+ const btn=document.getElementById('btnSubmitAll');
+ const oldHtml=btn?btn.innerHTML:'';
+ if(btn){btn.disabled=true;btn.innerHTML='⏳ HANTAR '+toSubmit.length+'...';}
+ document.getElementById('uploadOverlay').style.display='flex';
+ try{
+  const payloadPhotos=[];
+  for(let i=0;i<toSubmit.length;i++){
+   document.getElementById('uploadMessage').textContent='Uploading '+(i+1)+'/'+toSubmit.length;
+   const img=await fileToBase64(toSubmit[i].file);
+   payloadPhotos.push({photoIndex:i+1,fileName:img.fileName,mimeType:img.mimeType,base64:img.base64,sectionId:toSubmit[i].sectionId,locationId:toSubmit[i].locationId,meterId:toSubmit[i].meterId,pageNo:toSubmit[i].pageNo,readings:toSubmit[i].readings});
+  }
+  const final={operatorId:savedOpId,operatorName:savedOp,operatorSection:savedSec,photos:payloadPhotos};
+  google.script.run.withSuccessHandler(res=>{
+   document.getElementById('uploadOverlay').style.display='none';_isSubmitting=false;
+   if(btn){btn.disabled=false;btn.innerHTML=oldHtml;}
+   if(res && res.success){setStatus('🚀 Berjaya '+toSubmit.length+'!','success');photos=photos.filter(p=>!p.readingSaved);renderVertical();updateQueueInfo&&updateQueueInfo();}
+   else{let m=res?(res.error||res.message):'Undefined';if(confirm('Server: '+m+'\nSimpan Offline Queue?')){saveToQueue(final).then(()=>{photos=photos.filter(p=>!p.readingSaved);renderVertical();updateQueueInfo&&updateQueueInfo();});}}
+  }).withFailureHandler(async err=>{
+   document.getElementById('uploadOverlay').style.display='none';_isSubmitting=false;
+   if(btn){btn.disabled=false;btn.innerHTML=oldHtml;}
+   let msg=err?(err.message||err):'Undefined';
+   if(confirm('Gagal: '+msg+'\nSimpan Offline Queue?')){await saveToQueue(final);photos=photos.filter(p=>!p.readingSaved);renderVertical();await updateQueueInfo();}
+  }).submitPhotoBatch(final);
+ }catch(e){document.getElementById('uploadOverlay').style.display='none';_isSubmitting=false;if(btn){btn.disabled=false;btn.innerHTML=oldHtml;}if(confirm('Error: '+e.message+'\nSimpan Offline?'))await saveOfflineOnly();}
+}
+async function syncOfflineQueue(){const q=await loadQueue();if(!q.length){alert('Tiada queue');return;}if(!navigator.onLine){alert('📴 Masih offline');return;}if(!confirm('Sync '+q.length+' queue?'))return;document.getElementById('uploadOverlay').style.display='flex';for(let item of q){try{document.getElementById('uploadMessage').textContent='Sync '+item.key;await new Promise((res,rej)=>{google.script.run.withSuccessHandler(r=>{if(r&&r.success)res(r);else rej(new Error(r?r.message:'Undefined'));}).withFailureHandler(e=>rej(e)).submitPhotoBatch(item.payload.payload||item.payload);});await clearQueueItem(item.key);}catch(e){document.getElementById('uploadOverlay').style.display='none';alert('Gagal sync '+item.key+': '+(e.message||e));return;}}document.getElementById('uploadOverlay').style.display='none';setStatus('✅ Queue synced!','success');await updateQueueInfo();renderReadingLogs();}
+async function updateQueueInfo(){const q=await loadQueue();const el=document.getElementById('queueInfo');if(q.length){el.style.display='block';el.textContent='📦 '+q.length+' offline queue - tekan Sync';}else{el.style.display='none';}}
+function addReadingLog(meterId,pageNo,pageName,readings){const now=new Date();const entry={type:'reading',time:now.toLocaleTimeString('ms-MY'),date:now.toLocaleDateString('ms-MY'),operator:localStorage.getItem(STORAGE_KEY_OP)||'No Operator',section:localStorage.getItem(STORAGE_KEY_SEC)||currentOperatorSection||'NO-SEC',meterId:meterId,pageNo:pageNo,pageName:pageName||'',readings:readings,full:now.toISOString()};activityLogs.unshift(entry);if(activityLogs.length>200)activityLogs=activityLogs.slice(0,200);saveLogs();renderReadingLogs();}
+function filterLogBySection(sec){currentLogFilter=sec;document.querySelectorAll('.log-filter-btn').forEach(b=>b.classList.remove('active'));let safe=sec.replace(/[^A-Z0-9]/gi,'');let bid='logFilter'+(sec==='ALL'?'All':safe);let btn=document.getElementById(bid);if(btn)btn.classList.add('active');renderReadingLogs(false,true);}
+function renderReadingLogs(silent, forceFilter){
+ const logContainer=document.getElementById('logList'); if(!logContainer) return;
+ let mySection=getMySection();
+
+ // OFFLINE-FIRST LOGGER: use IndexedDB and never call google.script.run offline.
+ if(!navigator.onLine){
+   loadCache().then(cache=>{
+     activityLogs=cache.logs||[];
+     renderCachedReadingLogs(mySection, forceFilter);
+   }).catch(err=>{
+     console.error('Offline logger cache error:',err);
+     if(isFirstLoad){
+       logContainer.innerHTML='<div style="padding:20px;text-align:center;color:#888">📴 Offline - tiada cache logger</div>';
+     }
+   });
+   return;
+ }
+
+ if(!forceFilter && mySection!=='ALL' && isFirstLoad){currentLogFilter=mySection;}
+ if(isFirstLoad &&!silent){ logContainer.innerHTML='<div style="padding:20px;text-align:center">⏳ Loading...</div>'; }
+ if(typeof google==='undefined'||!google.script||!google.script.run){ logContainer.innerHTML='<div style="padding:20px;text-align:center;color:#888">Offline</div>'; return; }
+ google.script.run.withSuccessHandler(function(res){
+  if(!res ||!res.success){ if(isFirstLoad) logContainer.innerHTML='<div style="padding:20px;text-align:center;color:#dc2626">❌ Gagal load<br><button type="button" onclick="renderReadingLogs()" style="background:#0f172a;color:#fff;padding:6px 10px;border-radius:6px;margin-top:6px">Retry</button></div>'; return;}
+  let secs = (allSections && allSections.length)? allSections.map(s=>s.sectionId) : ['GAS','SOLID','LIQUID','ERS','M&E','S&I'];
+  if(!res.logs || res.logs.length===0){logContainer.innerHTML='<div style="padding:20px;text-align:center">Tiada log untuk '+mySection+'</div>';return;}
+  let display=res.logs; display.sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp));
+  let pageGroups=[]; display.forEach(l=>{ let t=new Date(l.timestamp).getTime(); let found=pageGroups.find(g=>{ let diff=Math.abs(new Date(g.time).getTime()-t); return diff<300000 && g.meter===l.meter && String(g.page).toLowerCase()===String(l.page).toLowerCase() && g.location===l.location && g.operatorName===l.operatorName; }); if(found){ found.params.push(l); if(t>new Date(found.time).getTime()) found.time=l.timestamp; }else{ pageGroups.push({time:l.timestamp, operatorName:l.operatorName, section:String(l.section||'').toUpperCase(), location:l.location, meter:l.meter, page:l.page, params:[l]}); }});
+  pageGroups.sort((a,b)=> new Date(b.time)-new Date(a.time));
+  const ONE_HOUR=60*60*1000;
+  let batches=[]; pageGroups.forEach(pg=>{
+    let t=new Date(pg.time).getTime();
+    if(!batches.length){ batches.push({time:pg.time, operatorName:pg.operatorName, section:pg.section, pages:[pg]}); return;}
+    let last=batches[batches.length-1]; let lastT=new Date(last.time).getTime(); let gap=Math.abs(lastT - t);
+    if(gap>ONE_HOUR || last.operatorName!==pg.operatorName){ batches.push({time:pg.time, operatorName:pg.operatorName, section:pg.section, pages:[pg]}); }
+    else{ last.pages.push(pg); if(t>lastT) last.time=pg.time; }
+  });
+  let elAll=document.getElementById('cntAll'); if(elAll) elAll.textContent=batches.length+' batch / '+pageGroups.length+' pg';
+  secs.forEach(s=>{
+    let sUp = String(s).toUpperCase();
+    let b = batches.filter(x=>String(x.section||'').toUpperCase()===sUp).length;
+    let p = pageGroups.filter(x=>String(x.section||'').toUpperCase()===sUp).length;
+    let safe=s.replace(/[^A-Z0-9]/gi,'');let el=document.getElementById('cnt'+safe); if(el) el.textContent=b+' / '+p;
+  });
+  let effectiveFilter = currentLogFilter;
+  if(mySection!=='ALL' &&!forceFilter){ effectiveFilter = mySection; }
+  document.querySelectorAll('.log-filter-btn').forEach(b=>b.classList.remove('active'));
+  let activeBtn = document.getElementById('logFilter'+(effectiveFilter==='ALL'?'All':effectiveFilter.replace(/[^A-Z0-9]/gi,'')));
+  if(activeBtn) activeBtn.classList.add('active');
+  let filteredBatches=batches;
+  if(effectiveFilter!=='ALL'){ filteredBatches=batches.filter(b=>String(b.section||'').toUpperCase()===String(effectiveFilter).toUpperCase());}
+  let html=''; let nowMs=Date.now();
+  filteredBatches.forEach(batch=>{
+    let batchT=batch.time? new Date(batch.time).toLocaleString('ms-MY'):'';
+    html+='<div style="margin-bottom:14px;border:2px solid #0091d5;border-radius:12px;overflow:hidden"><div style="background:#0091d5;color:#fff;padding:6px 10px;display:flex;justify-content:space-between;font-size:11px"><b>📦 BATCH - '+batchT+'</b><span>👷 '+batch.operatorName+' ['+batch.section+'] • '+batch.pages.length+' page</span></div>';
+    batch.pages.forEach(g=>{
+      let borderColor=g.section==='GAS'?'#f59e0b':g.section==='SOLID'?'#10b981':g.section==='LIQUID'?'#0ea5e9':'#64748b'; let t=g.time? new Date(g.time).toLocaleString('ms-MY'):''; let isNew=(nowMs - new Date(g.time).getTime()) < (30*60*1000); g.params.sort((a,b)=> String(a.parameter).localeCompare(String(b.parameter)));
+      html+='<div style="border-top:1px solid #e2e8f0;border-left:4px solid '+borderColor+';background:#fff"><div style="background:#f8fafc;padding:6px 10px;display:flex;justify-content:space-between"><div style="flex:1"><b style="font-size:11px">📄 Page '+ (g.page||'-')+' | '+ (g.meter||'')+'</b>'+(isNew?'<span style="background:#ef4444;color:#fff;font-size:8px;padding:2px 6px;border-radius:8px;margin-left:6px;animation:blinkSolidRed 1s infinite">NEW</span>':'')+'<br><small style="opacity:.7">'+ (g.location||'')+' • '+g.params.length+' param</small></div><div style="text-align:right"><span style="font-size:8px;background:#e2e8f0;padding:2px 6px;border-radius:8px;font-weight:700">'+ (g.section||'')+'</span><br><small style="font-size:8px;opacity:.6">'+t+'</small></div></div><div style="padding:4px 10px">'; g.params.forEach(p=>{ html+='<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed #f1f5f9;font-size:11px"><span>'+p.parameter+'</span><b>'+p.reading+' <small style="opacity:.6">'+(p.unit||'')+'</small></b></div>'; }); html+='</div></div>';
+    });
+    html+='</div>';
+  });
+  logContainer.innerHTML=html||'<div style="padding:20px;text-align:center">Tiada log untuk '+effectiveFilter+'</div>';
+  document.getElementById('logCount').textContent='Total: '+filteredBatches.length+' batch / '+filteredBatches.reduce((a,b)=>a+b.pages.length,0)+' page - '+effectiveFilter;
+  isFirstLoad=false;
+ }).withFailureHandler(function(err){ if(isFirstLoad) logContainer.innerHTML='<div style="padding:10px;color:#991b1b;font-size:11px">Offline: '+err.message+'</div>';}).getAllActivityLogs(mySection==='ALL'?'ALL':mySection);
+}
+function renderCachedReadingLogs(mySection, forceFilter){
+  const logContainer=document.getElementById('logList');
+  if(!logContainer) return;
+
+  const logs=Array.isArray(activityLogs)?activityLogs:[];
+  const filter=(mySection!=='ALL' && !forceFilter)
+    ? mySection
+    : (currentLogFilter||'ALL');
+
+  if(!logs.length){
+    logContainer.innerHTML='<div style="padding:20px;text-align:center">📴 Tiada offline log</div>';
+    const lc=document.getElementById('logCount');
+    if(lc) lc.textContent='Offline: 0 log - '+filter;
+    isFirstLoad=false;
+    return;
+  }
+
+  const normalized=logs.map(function(l){
+    return {
+      timestamp:l.timestamp||l.full||new Date().toISOString(),
+      operatorName:l.operatorName||l.operator||'',
+      section:String(l.section||'').toUpperCase(),
+      location:l.location||'',
+      meter:l.meter||l.meterName||l.meterId||'',
+      page:l.page||l.pageName||l.pageNo||'',
+      parameter:l.parameter||'',
+      reading:l.reading!==undefined?l.reading:'',
+      unit:l.unit||'',
+      status:l.status||'DONE'
+    };
+  }).filter(function(l){
+    return filter==='ALL' ||
+      String(l.section||'').toUpperCase()===String(filter).toUpperCase();
+  });
+
+  normalized.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+
+  if(!normalized.length){
+    logContainer.innerHTML='<div style="padding:20px;text-align:center">📴 Tiada offline log untuk '+filter+'</div>';
+    const lc=document.getElementById('logCount');
+    if(lc) lc.textContent='Offline: 0 log - '+filter;
+    isFirstLoad=false;
+    return;
+  }
+
+  let pageGroups=[];
+  normalized.forEach(function(l){
+    const t=new Date(l.timestamp).getTime();
+    let found=pageGroups.find(function(g){
+      const diff=Math.abs(new Date(g.time).getTime()-t);
+      return diff<300000 &&
+        g.meter===l.meter &&
+        String(g.page).toLowerCase()===String(l.page).toLowerCase() &&
+        g.location===l.location &&
+        g.operatorName===l.operatorName;
+    });
+
+    if(found){
+      found.params.push(l);
+      if(t>new Date(found.time).getTime()) found.time=l.timestamp;
+    }else{
+      pageGroups.push({
+        time:l.timestamp,
+        operatorName:l.operatorName,
+        section:String(l.section||'').toUpperCase(),
+        location:l.location,
+        meter:l.meter,
+        page:l.page,
+        params:[l]
+      });
+    }
+  });
+
+  pageGroups.sort((a,b)=>new Date(b.time)-new Date(a.time));
+
+  const ONE_HOUR=60*60*1000;
+  let batches=[];
+  pageGroups.forEach(function(pg){
+    const t=new Date(pg.time).getTime();
+
+    if(!batches.length){
+      batches.push({time:pg.time,operatorName:pg.operatorName,section:pg.section,pages:[pg]});
+      return;
+    }
+
+    const last=batches[batches.length-1];
+    const lastT=new Date(last.time).getTime();
+    const gap=Math.abs(lastT-t);
+
+    if(gap>ONE_HOUR || last.operatorName!==pg.operatorName){
+      batches.push({time:pg.time,operatorName:pg.operatorName,section:pg.section,pages:[pg]});
+    }else{
+      last.pages.push(pg);
+      if(t>lastT) last.time=pg.time;
+    }
+  });
+
+  let html='';
+  const nowMs=Date.now();
+
+  batches.forEach(function(batch){
+    const batchT=batch.time?new Date(batch.time).toLocaleString('ms-MY'):'';
+
+    html+='<div style="margin-bottom:14px;border:2px solid #0091d5;border-radius:12px;overflow:hidden">'+
+      '<div style="background:#0091d5;color:#fff;padding:6px 10px;display:flex;justify-content:space-between;font-size:11px">'+
+      '<b>📦 BATCH - '+batchT+'</b>'+
+      '<span>👷 '+batch.operatorName+' ['+batch.section+'] • '+batch.pages.length+' page</span></div>';
+
+    batch.pages.forEach(function(g){
+      const borderColor=g.section==='GAS'?'#f59e0b':
+        g.section==='SOLID'?'#10b981':
+        g.section==='LIQUID'?'#0ea5e9':'#64748b';
+
+      const t=g.time?new Date(g.time).toLocaleString('ms-MY'):'';
+      const isNew=(nowMs-new Date(g.time).getTime())<(30*60*1000);
+
+      g.params.sort((a,b)=>String(a.parameter).localeCompare(String(b.parameter)));
+
+      html+='<div style="border-top:1px solid #e2e8f0;border-left:4px solid '+borderColor+';background:#fff">'+
+        '<div style="background:#f8fafc;padding:6px 10px;display:flex;justify-content:space-between">'+
+        '<div style="flex:1"><b style="font-size:11px">📄 Page '+(g.page||'-')+' | '+(g.meter||'')+'</b>'+
+        (isNew?'<span style="background:#ef4444;color:#fff;font-size:8px;padding:2px 6px;border-radius:8px;margin-left:6px;animation:blinkSolidRed 1s infinite">NEW</span>':'')+
+        '<br><small style="opacity:.7">'+(g.location||'')+' • '+g.params.length+' param</small></div>'+
+        '<div style="text-align:right"><span style="font-size:8px;background:#e2e8f0;padding:2px 6px;border-radius:8px;font-weight:700">'+(g.section||'')+'</span>'+
+        '<br><small style="font-size:8px;opacity:.6">'+t+'</small></div></div>'+
+        '<div style="padding:4px 10px">';
+
+      g.params.forEach(function(p){
+        html+='<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed #f1f5f9;font-size:11px">'+
+          '<span>'+p.parameter+'</span>'+
+          '<b>'+p.reading+' <small style="opacity:.6">'+(p.unit||'')+'</small></b></div>';
+      });
+
+      html+='</div></div>';
+    });
+
+    html+='</div>';
+  });
+
+  logContainer.innerHTML=html||'<div style="padding:20px;text-align:center">Tiada log untuk '+filter+'</div>';
+
+  const lc=document.getElementById('logCount');
+  if(lc){
+    lc.textContent='📴 Offline cache: '+batches.length+
+      ' batch / '+batches.reduce((a,b)=>a+b.pages.length,0)+
+      ' page - '+filter;
+  }
+
+  isFirstLoad=false;
+}
+
+function exportReadingLog(){google.script.run.withSuccessHandler(function(res){if(!res.success||!res.logs.length){alert('Tiada log');return;}let filtered=res.logs;if(currentLogFilter!=='ALL')filtered=res.logs.filter(l=>String(l.section||'').toUpperCase()===String(currentLogFilter).toUpperCase());let csv='Timestamp,Operator,Section,Location,Meter,Page,Parameter,Reading,Unit,Status\n';filtered.forEach(l=>{csv+='"'+l.timestamp+'","'+l.operatorName+'","'+l.section+'","'+l.location+'","'+l.meter+'","'+l.page+'","'+l.parameter+'","'+l.reading+'","'+l.unit+'","'+l.status+'"\n';});const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ReadingLog_'+currentLogFilter+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();}).getAllActivityLogs();}
+function openSettings(){document.getElementById('settingsModal').classList.add('active');refreshAllSettings();}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('active');}
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>{
+    c.classList.remove('active');
+    c.style.display='none';
+  });
+  const tb=document.getElementById('tab'+name);
+  const ct=document.getElementById('content'+name);
+  if(tb)tb.classList.add('active');
+  if(ct){ct.classList.add('active');ct.style.display='block';}
+}
+function refreshAllSectionDropdowns(){
+  let all = (allSections && allSections.length)? allSections : [];
+  let secs = all.filter(s=>{let a=s.active; if(a===undefined||a===null||a==='') return true; return String(a).toUpperCase()==='TRUE'||a===true||a===1||String(a)==='1';}).map(s=>s.sectionId);
+  if(!secs.length) secs = ['GAS','SOLID','LIQUID','ERS','M&E','S&I'];
+  const ft=document.getElementById('ftSection'); if(ft){ const cur=ft.value; ft.innerHTML='<option value="">-- Pilih Section --</option>'+secs.map(s=>'<option value="'+s+'">'+s+'</option>').join(''); if(cur) ft.value=cur; }
+  const opSec=document.getElementById('newOperatorSection'); if(opSec){ const cur=opSec.value; opSec.innerHTML='<option value="">-- Pilih --</option>'+secs.map(s=>'<option value="'+s+'">'+s+'</option>').join(''); if(cur) opSec.value=cur; }
+  const locSec=document.getElementById('newLocSection'); if(locSec){ const cur=locSec.value; locSec.innerHTML='<option value="">-- Pilih Section --</option>'+secs.map(s=>'<option value="'+s+'">'+s+'</option>').join(''); if(cur) locSec.value=cur; }
+  const bar=document.getElementById('dynamicLogFilterBar');
+  if(bar){
+    let html=`<button type="button" id="logFilterAll" class="log-filter-btn ${currentLogFilter==='ALL'?'active':''}" onclick="filterLogBySection('ALL')">ALL (<span id="cntAll">0</span>)</button>`;
+    secs.forEach(id=>{
+      let safe=id.replace(/[^A-Z0-9]/gi,'');
+      let bg=id==='GAS'?'#fef3c7':id==='SOLID'?'#dcfce7':id==='LIQUID'?'#e0f2fe':id==='ERS'?'#ede9fe':id==='M&E'?'#ffedd5':'#fce7f3';
+      let act=currentLogFilter===id?'active':'';
+      html+=`<button type="button" id="logFilter${safe}" class="log-filter-btn ${act}" onclick="filterLogBySection('${id}')" style="background:${bg}">${id} (<span id="cnt${safe}">0 / 0</span>)</button>`;
+    });
+    bar.innerHTML=html;
+  }
+}
+function refreshAllSettings(){refreshOperatorList();refreshSecList();refreshAllSectionDropdowns();refreshMeterLocSelect();refreshPageMeterSelect();refreshParamMeterSelect();}
+function refreshOperatorList(){const wrap=document.getElementById('existingOps');if(!wrap) return; if(!operators.length){wrap.innerHTML='<div style="font-size:11px;opacity:.5">Tiada operator</div>';return;}wrap.innerHTML=operators.map(op=>'<div class="operator-badge" style="background:#f1f5f9;border:1px solid #e2e8f0;padding:6px 10px;border-radius:20px;font-size:11px;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span>'+op.operatorName+' ['+(op.section||'NO-SEC')+']</span><span style="cursor:pointer;margin-left:8px" onclick="requestDelete(\''+op.operatorName+'\')">✕</span></div>').join('');}
+function requestDelete(name){deleteTarget=name;document.getElementById('adminPassField').style.display='block';}
+function confirmDelete(){const pass=document.getElementById('adminPassInput').value.trim();if(!pass){alert('Masukkan password');return;}google.script.run.withSuccessHandler(res=>{if(res.success){setStatus('Deleted '+deleteTarget,'success');document.getElementById('adminPassField').style.display='none';loadMaster();}else{alert(res.message);}}).withFailureHandler(err=>alert(err.message)).deleteOperator(deleteTarget,pass);}
+function registerOperator(){const name=document.getElementById('newOperatorName').value.trim();const sec=document.getElementById('newOperatorSection').value;if(!name||!sec){alert('Isi nama & section');return;}google.script.run.withSuccessHandler(res=>{const el=document.getElementById('regStatus');el.style.display='block';el.textContent=res.message;el.className=res.success?'status success':'status error';if(res.success){document.getElementById('newOperatorName').value='';loadMaster();}}).registerOperator(name,sec);}
+function refreshSecList(){const wrap=document.getElementById('secList'); if(!wrap) return; if(!allSections.length){wrap.innerHTML='<div style="font-size:11px">Tiada custom - default GAS/SOLID/LIQUID</div>';}else{wrap.innerHTML=allSections.map(s=>'<div style="font-size:11px;padding:6px;border:1px solid #eee;border-radius:6px;margin-bottom:4px;display:flex;justify-content:space-between"><span><b>'+s.sectionId+'</b> - '+s.sectionName+'</span><small style="opacity:.6">'+(s.description||'')+'</small></div>').join('');} refreshAllSectionDropdowns();}
+function registerSectionUI(){const id=document.getElementById('newSecId').value.trim().toUpperCase();const name=document.getElementById('newSecName').value.trim();const desc=document.getElementById('newSecDesc').value.trim();if(!id||!name){alert('ID & Name wajib');return;}google.script.run.withSuccessHandler(res=>{const el=document.getElementById('secStatus');el.style.display='block';el.textContent=res.message;el.className=res.success?'status success':'status error';if(res.success)loadMaster();}).registerSection(id,name,desc);}
+function refreshMeterLocSelect(){const sel=document.getElementById('meterLocSelect');if(!sel)return;sel.innerHTML='<option value="">-- Pilih Location --</option>'+locations.map(l=>'<option value="'+l.locationId+'">'+l.locationName+' ['+l.section+']</option>').join('');}
+function registerLocation(){const id=document.getElementById('newLocId').value.trim().toUpperCase();const name=document.getElementById('newLocName').value.trim();const desc=document.getElementById('newLocDesc').value.trim();const sec=document.getElementById('newLocSection').value;if(!id||!name){alert('ID & Name wajib');return;}google.script.run.withSuccessHandler(res=>{const el=document.getElementById('locStatus');el.style.display='block';el.textContent=res.message;el.className=res.success?'status success':'status error';if(res.success)loadMaster();}).registerLocation(id,name,desc,sec);}
+function registerMeter(){const locId=document.getElementById('meterLocSelect').value;const mId=document.getElementById('newMeterId').value.trim().toUpperCase();const mName=document.getElementById('newMeterName').value.trim();const mType=document.getElementById('newMeterType').value;if(!locId||!mId||!mName){alert('Lengkapkan');return;}google.script.run.withSuccessHandler(res=>{const el=document.getElementById('meterStatus');el.style.display='block';el.textContent=res.message||'OK';el.className=res.success?'status success':'status error';if(res.success)loadMaster();}).registerMeter(locId,mId,mName,mType);}
+function refreshPageMeterSelect(){const sel=document.getElementById('pageMeterSelect');if(!sel)return;sel.innerHTML='<option value="">-- Pilih Meter --</option>'+allMeters.map(m=>'<option value="'+m.meterId+'">'+m.meterId+' - '+m.meterName+'</option>').join('');}
+function refreshPageList(){}
+function registerPage(){const mId=document.getElementById('pageMeterSelect').value;const pNo=document.getElementById('newPageNo').value;const pName=document.getElementById('newPageName').value;if(!mId||!pNo||!pName){alert('Lengkapkan');return;}google.script.run.withSuccessHandler(res=>{const el=document.getElementById('pageStatus');el.style.display='block';el.textContent=res.message||'OK';el.className=res.success?'status success':'status error';if(res.success)loadMaster();}).registerMeterPage(mId,pNo,pName);}
+function refreshParamMeterSelect(){const sel=document.getElementById('paramMeterSelect');if(!sel)return;sel.innerHTML='<option value="">-- Pilih Meter --</option>'+allMeters.map(m=>'<option value="'+m.meterId+'">'+m.meterId+'</option>').join('');}
+function refreshParamPageSelect(){const mId=document.getElementById('paramMeterSelect').value;const sel=document.getElementById('paramPageSelect');if(!mId){sel.innerHTML='<option value="">-- Pilih Page --</option>';return;}const pages=allPages.filter(p=>String(p.meterId)===String(mId));sel.innerHTML='<option value="">-- Pilih Page --</option>'+pages.map(p=>'<option value="'+p.pageNo+'">'+p.pageNo+' - '+p.pageName+'</option>').join('');}
+function addParameter(){const mId=document.getElementById('paramMeterSelect').value;const pNo=document.getElementById('paramPageSelect').value;const pName=document.getElementById('newParamName').value;const pUnit=document.getElementById('newParamUnit').value;if(!mId||!pNo||!pName){alert('Lengkapkan');return;}google.script.run.withSuccessHandler(res=>{const el=document.getElementById('paramStatus');el.style.display='block';el.textContent=res.message;el.className=res.success?'status success':'status error';if(res.success)loadMaster();}).registerParameter(mId,pNo,pName,pUnit);}
+async function checkRealOnline(){
+  if(!navigator.onLine) return false;
+  try{
+    const ctrl=new AbortController();
+    setTimeout(()=>ctrl.abort(),2500);
+    await fetch('https://www.gstatic.com/generate_204',{method:'HEAD',cache:'no-store',mode:'no-cors',signal:ctrl.signal});
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+async function updateLiveStatus(){const el=document.getElementById('liveStatus'); if(!el) return;if(!navigator.onLine){ el.className='live-offline'; el.textContent='● OFFLINE'; return; }const ok = await checkRealOnline();el.className = ok? 'live-online' : 'live-offline';el.textContent = ok? '● ONLINE' : '● OFFLINE';}
+async function loadMaster(){
+  const applyCache = async (statusText, statusType) => {
+    const cache = await loadCache();
+    locations = cache.locations || [];
+    operators = cache.operators || [];
+    allMeters = cache.meters || [];
+    allPages = cache.pages || [];
+    allParams = cache.parameters || [];
+    allSections = cache.sections || [];
+    activityLogs = cache.logs || [];
+
+    refreshAllSectionDropdowns();
+    ftFilterOperator();
+    refreshOperatorList();
+    refreshSecList();
+    setStatus(statusText, statusType);
+    try{ checkFirstTime(); }catch(e){ console.warn('checkFirstTime:',e); }
+  };
+
+  const cacheFallback = async (reason) => {
+    try{
+      await applyCache(reason || '📴 Offline cache loaded','error');
+    }catch(cacheErr){
+      console.error('cacheFallback error:', cacheErr);
+      setStatus('📴 Offline cache unavailable','error');
+    }
+  };
+
+  try{
+    // OFFLINE-FIRST: never call google.script.run while offline.
+    if(!navigator.onLine){
+      await cacheFallback('📴 Offline cache loaded');
+      return;
+    }
+
+    await updateLiveStatus();
+
+    if(typeof google==='undefined' || !google.script || !google.script.run){
+      await cacheFallback('📴 App shell only - cache loaded');
+      return;
+    }
+
+    // IMPORTANT: Apps Script calls can remain pending when the page was
+    // restored from browser cache while connectivity is unavailable.
+    // Never let startup wait forever. Fall back to IndexedDB after 4 seconds.
+    let settled = false;
+    const timer = setTimeout(async()=>{
+      if(settled) return;
+      settled = true;
+      console.warn('getOfflineMasterBundle timeout - using IndexedDB cache');
+      await cacheFallback('📴 Server timeout - cache loaded');
+    },4000);
+
+    google.script.run
+      .withSuccessHandler(async bundle=>{
+        if(settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if(bundle && bundle.success){
+          locations = bundle.locations || [];
+          operators = bundle.operators || [];
+          allMeters = bundle.meters || [];
+          allPages = bundle.meterPages || [];
+          allParams = bundle.parameters || [];
+          allSections = bundle.sections || [];
+          await saveBundle(bundle);
+
+          refreshAllSectionDropdowns();
+          ftFilterOperator();
+          refreshOperatorList();
+          refreshSecList();
+          setStatus('✅ System Ready - '+locations.length+' locations, '+operators.length+' operators, '+allSections.length+' sections','success');
+          try{checkFirstTime();}catch(e){console.warn('checkFirstTime:',e);}
+          renderReadingLogs(true);
+        }else{
+          await cacheFallback('📴 Offline cache loaded');
+        }
+      })
+      .withFailureHandler(async ()=>{
+        if(settled) return;
+        settled = true;
+        clearTimeout(timer);
+        await cacheFallback('📴 Server unavailable - cache loaded');
+      })
+      .getOfflineMasterBundle();
+  }catch(e){
+    console.error('loadMaster error:', e);
+    await cacheFallback('📴 Cache loaded - server unavailable');
+  }
+}
+window.onload=async()=>{
+  loadOperatorPhoto();
+
+  // Paint the local UI immediately. Do not let server startup block the app.
+  try{ renderVertical(); }catch(e){ console.warn('initial renderVertical:',e); }
+  try{ await loadMaster(); }catch(e){ console.warn('startup loadMaster:',e); }
+  try{ await updateQueueInfo(); }catch(e){ console.warn('startup queue:',e); }
+
+  if(navigator.onLine){
+    setTimeout(()=>{try{renderReadingLogs();}catch(e){console.warn('startup logger:',e);}},800);
+  }else{
+    try{renderReadingLogs(true);}catch(e){console.warn('cached logger:',e);}
+  }
+};
+
+// Offline relaunch watchdog: if startup is restored from browser cache,
+// guarantee the main UI is not left behind a loading overlay.
+setTimeout(()=>{
+  try{
+    const ov=document.getElementById('uploadOverlay');
+    if(ov && !navigator.onLine) ov.style.display='none';
+    renderVertical();
+    updateQueueInfo().catch(()=>{});
+  }catch(e){ console.warn('offline boot watchdog:',e); }
+},5000);
+
+window.addEventListener('online',async()=>{
+  await updateLiveStatus();
+  await loadMaster();
+  await updateQueueInfo();
+  renderReadingLogs(true);
+});
+
+window.addEventListener('offline',()=>{
+  updateLiveStatus();
+  renderReadingLogs(true);
+});
+
+setInterval(()=>{
+  updateLiveStatus();
+  if(navigator.onLine) renderReadingLogs(true);
+},15000);
+
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden){
+    updateLiveStatus();
+    renderReadingLogs(true);
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function(){
+  if(typeof photos === 'undefined') window.photos = [];
+  renderVertical();
+  setTimeout(renderVertical, 500);
+});
+function afterResetUser(){photos = [];localStorage.removeItem('photos_cache');renderVertical();}
+</script>
+
+
+<script>
+// PATCH AUTO SCROLL - TAMPAL PALING BAWAH
+let focusedInput=null;
+document.addEventListener('focusin', e=>{
+  if(e.target.tagName==='INPUT' && e.target.closest('#editorMid')){
+    focusedInput=e.target;
+    document.querySelectorAll('.reading-row').forEach(r=>r.classList.remove('active'));
+    e.target.closest('.reading-row')?.classList.add('active');
+  }
+});
+function doAutoScroll(inp){
+  if(!inp) return;
+  inp.focus({preventScroll:true});
+  focusedInput=inp;
+  inp.closest('.reading-row').classList.add('active');
+  inp.closest('.reading-row').scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>{ document.getElementById('editorMid').scrollTop = inp.closest('.reading-row').offsetTop - 30; },150);
+}
+let _nk=window.keypadNext, _pk=window.keypadPrev, _sv=window.saveFromEditor;
+window.keypadNext=function(){
+  let a=[...document.querySelectorAll('#editorMid input')];
+  if(!a.length) return; let i=a.indexOf(focusedInput);
+  doAutoScroll(a[i+1]||a[0]); if(_nk) _nk();
+}
+window.keypadPrev=function(){
+  let a=[...document.querySelectorAll('#editorMid input')];
+  if(!a.length) return; let i=a.indexOf(focusedInput);
+  doAutoScroll(a[i-1]||a[a.length-1]); if(_pk) _pk();
+}
+window.saveFromEditor=function(){
+  if(_sv) _sv();
+  setTimeout(()=>{ let a=[...document.querySelectorAll('#editorMid input')]; if(!a.length) return; let i=a.indexOf(focusedInput); doAutoScroll(a[i+1]||a[0]); },400);
+}
+</script>
+
+
+
+<style id="helpLegendStyles">
+#helpLegendOverlay{
+  position:fixed;
+  inset:0;
+  z-index:6000;
+  background:#f8fafc;
+  display:none;
+  overflow:hidden;
+}
+#helpLegendOverlay.show{display:block}
+.helpLegendHeader{
+  height:76px;
+  background:#0f172a;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  box-sizing:border-box;
+  position:sticky;
+  top:0;
+  z-index:2;
+  box-shadow:0 2px 10px rgba(0,0,0,.18);
+}
+.helpLegendTitle{
+  font-size:22px;
+  font-weight:900;
+}
+.helpLegendClose{
+  border:0;
+  border-radius:14px;
+  background:#fff;
+  color:#0f172a;
+  font-size:24px;
+  font-weight:900;
+  width:48px;
+  height:48px;
+}
+.helpLegendBody{
+  height:calc(100dvh - 76px);
+  overflow-y:auto;
+  padding:14px;
+  box-sizing:border-box;
+}
+.helpLegendIntro{
+  background:#fff;
+  border:1px solid #dbeafe;
+  border-radius:14px;
+  padding:12px 14px;
+  margin-bottom:14px;
+  font-size:15px;
+  line-height:1.45;
+}
+.helpLegendGrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.helpLegendCard{
+  background:#fff;
+  border:1px solid #cbd5e1;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(15,23,42,.08);
+}
+.helpLegendPhoto{
+  display:block;
+  width:100%;
+  aspect-ratio:16/10;
+  background:#e2e8f0;
+  overflow:hidden;
+  text-decoration:none;
+  position:relative;
+  touch-action:manipulation;
+}
+.helpLegendPhoto img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  display:block;
+  cursor:zoom-in;
+}
+.helpLegendZoomHint{
+  position:absolute;
+  right:8px;
+  bottom:8px;
+  background:rgba(15,23,42,.78);
+  color:#fff;
+  padding:5px 8px;
+  border-radius:9px;
+  font-size:11px;
+  font-weight:800;
+  pointer-events:none;
+}
+.helpLegendPhotoFallback{
+  width:100%;
+  height:100%;
+  min-height:130px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:6px;
+  color:#64748b;
+  font-weight:800;
+  text-align:center;
+  padding:12px;
+  box-sizing:border-box;
+}
+.helpLegendMeta{
+  padding:12px;
+}
+.helpLegendName{
+  font-size:19px;
+  font-weight:900;
+  color:#0f172a;
+  margin-bottom:6px;
+}
+.helpLegendLine{
+  font-size:15px;
+  color:#334155;
+  margin-top:4px;
+}
+.helpLegendUnits{
+  margin-top:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+}
+.helpLegendUnit{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 8px;
+  border-radius:9px;
+  background:#eff6ff;
+  color:#1e40af;
+  border:1px solid #bfdbfe;
+  font-size:13px;
+  font-weight:800;
+}
+.helpLegendEmpty{
+  padding:18px;
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  border-radius:12px;
+  color:#9a3412;
+  font-weight:700;
+}
+/* Floating Help Photo Viewer */
+.helpPhotoFloatOverlay{
+  position:fixed;
+  inset:0;
+  z-index:100000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(2,6,23,.78);
+  backdrop-filter:blur(3px);
+}
+.helpPhotoFloatOverlay.show{display:flex;}
+.helpPhotoFloatPanel{
+  position:relative;
+  width:min(96vw,900px);
+  height:min(88vh,900px);
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.helpPhotoFloatImage{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  background:#e2e8f0;
+}
+.helpPhotoFloatClose{
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:2;
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:50%;
+  background:rgba(15,23,42,.88);
+  color:#fff;
+  font-size:24px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 3px 12px rgba(0,0,0,.25);
+}
+.helpPhotoFloatHint{
+  position:absolute;
+  left:50%;
+  bottom:10px;
+  transform:translateX(-50%);
+  z-index:2;
+  background:rgba(15,23,42,.82);
+  color:#fff;
+  padding:7px 12px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+  pointer-events:none;
+}
+@media(max-width:700px){
+  .helpLegendGrid{grid-template-columns:1fr}
+  .helpLegendTitle{font-size:20px}
+  .helpLegendBody{padding:10px}
+}
+</style>
+
+<div id="helpLegendOverlay" aria-hidden="true">
+  <div class="helpLegendHeader">
+    <div class="helpLegendTitle">📖 Help / Meter Legend</div>
+    <button type="button" class="helpLegendClose" onclick="closeHelpLegend()">✕</button>
+  </div>
+  <div class="helpLegendBody">
+    <div class="helpLegendIntro">
+      <b>Rujukan photo meter</b><br>
+      Photo diambil secara automatik daripada folder <b>Help Photos</b> di Google Drive dan disusun ikut <b>Location ID</b>.
+      Tap photo untuk buka <b>floating image</b>. Tutup dengan butang ✕. Di bawah photo dipaparkan <b>nama meter</b>,
+      <b>page number</b> dan <b>unit parameter</b>.
+    </div>
+    <div id="helpLegendGrid" class="helpLegendGrid"></div>
+  </div>
+</div>
+
+<div id="helpPhotoFloatOverlay" class="helpPhotoFloatOverlay" aria-hidden="true"
+     onclick="closeHelpPhotoFloat(event)">
+  <div class="helpPhotoFloatPanel" onclick="event.stopPropagation()">
+    <button type="button" class="helpPhotoFloatClose"
+            onclick="closeHelpPhotoFloat(event)" aria-label="Tutup">✕</button>
+    <img id="helpPhotoFloatImage" class="helpPhotoFloatImage" alt="Help photo">
+    <div class="helpPhotoFloatHint">🖼️ Floating Photo • Tap ✕ untuk tutup</div>
+  </div>
+</div>
+
+<script id="helpLegendScript">
+/*
+ * HELP PHOTO SOURCE
+ * Google Drive folder dedicated to Help / Meter Legend photos.
+ */
+const HELP_PHOTO_FOLDER_ID = '1Db1MMCBlrMchS2VYopTV9pyKsSKI3oCn';
+
+const HELP_METER_PHOTOS = [
+  {name:'G1 Control Panel', meterName:'G1', pageNo:null, id:'1fZTwhpLRqWlOJaCog0MmxXBbdDSSaTbwc', params:[]},
+  {name:'G1 pg1', meterName:'G1', pageNo:1, id:'1Uwl7GdY2rDbjB33d1HkxUQjiJTsvBC4W', params:[
+    ['kWh net','kWh'],['kW tot','kW'],['kVAR tot','kVAR'],['kVA tot','kVA'],['PF sign tot','%']
+  ]},
+  {name:'G1 pg2', meterName:'G1', pageNo:2, id:'1FMCaLYqCE1Fo2eQGPUKJMA-7KKtRGX5o', params:[
+    ['kW tot','kW'],['kVAR tot','kVAR'],['kVA tot','kVA'],['PF sign tot','%']
+  ]},
+  {name:'G2 Control Panel', meterName:'G2', pageNo:null, id:'1AG-9T5ihodBSdhD-yvgvJgG69gPBnHhW', params:[]},
+  {name:'G2 pg1', meterName:'G2', pageNo:1, id:'11ZKTiM1SkE9UWkYathOhlJLElhvWdrfy', params:[
+    ['kWh net','kWh']
+  ]},
+  {name:'G2 pg2', meterName:'G2', pageNo:2, id:'1uRHwmG2MR2BhFqW0nI4JVDvTojHCvs3-', params:[
+    ['kW tot','kW'],['kVAR tot','kVAR'],['kVA tot','kVA'],['PF sign tot','%']
+  ]},
+  {name:'Gas Flow No.1', meterName:'Gas Flow No.1', pageNo:1, id:'1BZ1FzeBmYf8d2NxqGbhKM8ZaWCRcOs4', params:[
+    ['Gas Flow','Nm³/min'],['Total Gas Volume','Nm³']
+  ]},
+  {name:'Gas Flow No.2', meterName:'Gas Flow No.2', pageNo:1, id:'1qYqbQdq5B6qt399RMOgNhzvPKIPpd7Im', params:[
+    ['Gas Flow','Nm³/min'],['Total Gas Volume','Nm³']
+  ]},
+  {name:'Gas Measurement', meterName:'Gas Measurement', pageNo:1, id:'1Z25d5GA_-W4-cWThD7I8_IEKSPM8VpGEv', params:[
+    ['Carbon Dioxide (CO₂)','%'],['Water Vapor (H₂O)','%'],['Methane (CH₄)','%']
+  ]},
+  {name:'Gas Holder Level', meterName:'Gas Holder Level', pageNo:1, id:'11EWplZv9jUn_Uq8yMB1xqxNgA5MxsHv2', params:[
+    ['Height','Meter']
+  ]},
+  {name:'PS1-1 pg1', meterName:'PS1-1', pageNo:1, id:'1UBEw7UczU6hB_FScAO5PMIHM3bcQa3Z_', params:[
+    ['kWh net','kWh']
+  ]},
+  {name:'PS1-1 pg2', meterName:'PS1-1', pageNo:2, id:'1n_If_REk5v7IltOb1CMhHOvWoUKhP2Ms', params:[
+    ['kW tot','kW'],['kVAR tot','kVAR'],['kVA tot','kVA'],['PF sign tot','%']
+  ]},
+  {name:'PS1-2 pg1', meterName:'PS1-2', pageNo:1, id:'13-Zs03ZEDtlvpmwBaDQ4XGHehllCihSC', params:[
+    ['kWh net','kWh']
+  ]},
+  {name:'PS1-2 pg2', meterName:'PS1-2', pageNo:2, id:'1Hb5PqDKyXq-yK1hJrEF40AQ5u7Ij6LKL', params:[
+    ['kW tot','kW'],['kVAR tot','kVAR'],['kVA tot','kVA'],['PF sign tot','%']
+  ]},
+  {name:'PS3-1 pg1', meterName:'PS3-1', pageNo:1, id:'1ez7LbjD3KOAaBmpmUL5L8k0asyip8kri', params:[
+    ['kWh net','kWh']
+  ]},
+  {name:'PS3-1 pg2', meterName:'PS3-1', pageNo:2, id:'1frH5IdMUgks3JqcZKkTgiNgTEwphWaqg6', params:[
+    ['kW tot','kW'],['kVAR tot','kVAR'],['kVA tot','kVA'],['PF sign tot','%']
+  ]},
+  {name:'PS3-2 pg1', meterName:'PS3-2', pageNo:1, id:'1gSxr_TPmK_SnGLAtMA1Q1KeCT5KH0zaqB', params:[
+    ['kWh net','kWh']
+  ]},
+  {name:'PS3-2 pg2', meterName:'PS3-2', pageNo:2, id:'1_Y-7sRIoLKvM1xBpvrid515A2VVUmALDp', params:[
+    ['kW tot','kW'],['kVAR tot','kVAR'],['kVA tot','kVA'],['PF sign tot','%']
+  ]}
+];
+
+function helpDriveViewUrl(id){
+  return 'https://drive.google.com/file/d/'+id+'/view?usp=sharing';
+}
+function helpDriveViewUrl(id){
+  return 'https://drive.google.com/file/d/'+id+'/view?usp=sharing';
+}
+
+function helpImagePlaceholder(){
+  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500">' +
+    '<rect width="100%" height="100%" fill="#e2e8f0"/>' +
+    '<text x="50%" y="48%" dominant-baseline="middle" text-anchor="middle" fill="#64748b" font-size="28" font-family="Arial">📷 Loading photo...</text>' +
+    '</svg>'
+  );
+}
+
+function normalizeHelpPhotoName(value){
+  return String(value || '')
+    .toLowerCase()
+    .replace(/\.[a-z0-9]+$/i,'')
+    .replace(/page/g,'pg')
+    .replace(/control\s*panel/g,'controlpanel')
+    .replace(/[^a-z0-9]+/g,'');
+}
+
+function helpPhotoAliases(item){
+  const aliases = [
+    item.name,
+    item.meterName + (item.pageNo !== null && item.pageNo !== undefined ? ' pg' + item.pageNo : ''),
+    item.meterName + (item.pageNo !== null && item.pageNo !== undefined ? ' page ' + item.pageNo : '')
+  ];
+  return aliases.map(normalizeHelpPhotoName).filter(Boolean);
+}
+
+function loadHelpDriveImages(){
+  const images = Array.from(document.querySelectorAll('.helpDriveImage[data-help-name]'));
+  if(!images.length) return;
+
+  if(typeof google === 'undefined' || !google.script || !google.script.run){
+    images.forEach(function(img){
+      showHelpPhotoError(img, 'Google Apps Script tidak tersedia.');
+    });
+    return;
+  }
+
+  /*
+   * V8.4: first fetch ONLY the folder index (file names + IDs).
+   * Do not fetch thumbnails for every card at once.
+   */
+  google.script.run
+    .withSuccessHandler(function(result){
+      if(!result || !result.success){
+        images.forEach(function(img){
+          showHelpPhotoError(img, result && result.error ? result.error : 'Folder Help tidak dapat dibaca.');
+        });
+        return;
+      }
+
+      const files = Array.isArray(result.files) ? result.files : [];
+
+      images.forEach(function(img){
+        const expectedName = img.getAttribute('data-help-name') || '';
+        const expected = normalizeHelpPhotoName(expectedName);
+        const match = files.find(function(file){
+          return normalizeHelpPhotoName(file.name) === expected;
+        });
+
+        if(match){
+          img.dataset.fileId = match.fileId;
+          img.dataset.driveUrl = helpDriveViewUrl(match.fileId);
+          img.dataset.thumbState = 'waiting';
+
+          if(img.parentElement){
+            img.parentElement.href = helpDriveViewUrl(match.fileId);
+          }
+        }else{
+          showHelpPhotoError(img, 'Photo "' + expectedName + '" tidak dijumpai dalam folder Help.');
+        }
+      });
+
+      setupHelpPhotoLazyLoader(images);
+    })
+    .withFailureHandler(function(error){
+      images.forEach(function(img){
+        showHelpPhotoError(
+          img,
+          error && error.message ? error.message : 'Gagal membaca folder Help.'
+        );
+      });
+    })
+    .getHelpDriveFolderIndex(HELP_PHOTO_FOLDER_ID);
+}
+
+function setupHelpPhotoLazyLoader(images){
+  const loadOne = function(img){
+    if(!img || img.dataset.thumbState === 'loading' || img.dataset.thumbState === 'loaded') return;
+
+    const fileId = img.dataset.fileId;
+    if(!fileId) return;
+
+    img.dataset.thumbState = 'loading';
+
+    let finished = false;
+    const timeoutId = setTimeout(function(){
+      if(finished) return;
+      finished = true;
+      img.dataset.thumbState = 'error';
+      showHelpPhotoError(img, 'Photo masih loading. Sila cuba semula.');
+    }, 12000);
+
+    google.script.run
+      .withSuccessHandler(function(result){
+        if(finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+
+        if(result && result.success && result.dataUrl){
+          img.src = result.dataUrl;
+          img.dataset.thumbState = 'loaded';
+        }else{
+          img.dataset.thumbState = 'error';
+          showHelpPhotoError(img, result && result.error ? result.error : 'Thumbnail photo tidak tersedia.');
+        }
+      })
+      .withFailureHandler(function(error){
+        if(finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        img.dataset.thumbState = 'error';
+        showHelpPhotoError(
+          img,
+          error && error.message ? error.message : 'Gagal memuatkan thumbnail.'
+        );
+      })
+      .getHelpDriveThumbnail(fileId);
+  };
+
+  /*
+   * IntersectionObserver loads only photos near the viewport.
+   * rootMargin gives the next row a small head-start while scrolling.
+   */
+  if('IntersectionObserver' in window){
+    const observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          loadOne(entry.target);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {root:null, rootMargin:'500px 0px', threshold:0.01});
+
+    images.forEach(function(img){ observer.observe(img); });
+  }else{
+    /* Fallback for older browsers: load the first 4, then the rest. */
+    images.slice(0,4).forEach(loadOne);
+    setTimeout(function(){ images.slice(4).forEach(loadOne); }, 800);
+  }
+}
+
+function showHelpPhotoError(img, message){
+  const wrap=img.parentElement;
+  if(!wrap) return;
+  wrap.innerHTML='<div class="helpLegendPhotoFallback">📷<div>Photo tidak dapat dipaparkan</div><small>'+String(message||'Gagal membaca photo').replace(/[<>]/g,'')+'</small><small>Tap untuk buka Google Drive</small></div>';
+}
+
+function openHelpLegend(){
+  const ov=document.getElementById('helpLegendOverlay');
+  if(!ov) return;
+  ov.classList.add('show');
+  ov.setAttribute('aria-hidden','false');
+  renderHelpLegend();
+  waitForHelpMaster();
+}
+function closeHelpLegend(){
+  const ov=document.getElementById('helpLegendOverlay');
+  if(!ov) return;
+  ov.classList.remove('show');
+  ov.setAttribute('aria-hidden','true');
+}
+function waitForHelpMaster(){
+  let tries=0;
+  const timer=setInterval(()=>{
+    tries++;
+    if((Array.isArray(allMeters)&&allMeters.length) && (Array.isArray(allParams)&&allParams.length)){
+      clearInterval(timer);
+      renderHelpLegend();
+    }else if(tries>=30){
+      clearInterval(timer);
+      renderHelpLegend();
+    }
+  },300);
+}
+function helpPageData(item){
+  /*
+   * Map Help/Legend data to current MASTER DATA when available.
+   * Fallback to the fixed legend list so the page still renders
+   * even when master data has not finished loading.
+   */
+  const result = {
+    meterName: item.meterName || item.name || '',
+    pageNo: item.pageNo,
+    params: []
+  };
+
+  if (
+    Array.isArray(allParams) &&
+    allParams.length &&
+    item.meterName
+  ) {
+    const meter = Array.isArray(allMeters)
+      ? allMeters.find(function(m){
+          return String(m.meterName || '').trim().toLowerCase() ===
+                 String(item.meterName || '').trim().toLowerCase();
+        })
+      : null;
+
+    if (meter && item.pageNo !== null && item.pageNo !== undefined) {
+      const mapped = allParams
+        .filter(function(p){
+          return String(p.meterId) === String(meter.meterId) &&
+                 Number(p.pageNo) === Number(item.pageNo);
+        })
+        .sort(function(a,b){
+          return Number(a.displayOrder || 0) -
+                 Number(b.displayOrder || 0);
+        });
+
+      if (mapped.length) {
+        result.params = mapped.map(function(p){
+          return {
+            name: String(p.parameterName || ''),
+            unit: String(p.unit || '')
+          };
+        });
+      }
+    }
+  }
+
+  /*
+   * Always keep the configured Help/Legend parameters as fallback.
+   * This prevents a blank Help page when MASTER DATA is offline,
+   * incomplete, or still loading.
+   */
+  if (!result.params.length && Array.isArray(item.params)) {
+    result.params = item.params.map(function(p){
+      return {
+        name: p && p[0] !== undefined ? String(p[0]) : '',
+        unit: p && p[1] !== undefined ? String(p[1]) : ''
+      };
+    });
+  }
+
+  return result;
+}
+
+function openHelpPhotoFloat(img){
+  if(!img) return;
+  const src = img.currentSrc || img.src || '';
+  if(!src || src.indexOf('data:image/') !== 0) return;
+
+  const overlay = document.getElementById('helpPhotoFloatOverlay');
+  const viewer = document.getElementById('helpPhotoFloatImage');
+  if(!overlay || !viewer) return;
+
+  viewer.src = src;
+  viewer.alt = img.alt || 'Help photo';
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+}
+
+function closeHelpPhotoFloat(event){
+  if(event) event.stopPropagation();
+  const overlay = document.getElementById('helpPhotoFloatOverlay');
+  const viewer = document.getElementById('helpPhotoFloatImage');
+  if(overlay){
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden','true');
+  }
+  if(viewer) viewer.src='';
+  document.body.style.overflow='';
+}
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') closeHelpPhotoFloat(e);
+});
+
+
+/*
+ * HELP LOCATION ORDER
+ * Follows GAS Location selector order (Location ID is the primary key).
+ */
+const HELP_LOCATION_ORDER = [
+  'LOC-001', // Gas Measurement
+  'LOC-002', // G1
+  'LOC-003', // G2
+  'LOC-004', // G1 Control Panel
+  'LOC-005', // G2 Control Panel
+  'LOC-006', // Gas Flow No. 1
+  'LOC-007', // Gas Flow No. 2
+  'LOC-008', // Gas Holder Level
+  'LOC-009', // PS1-1
+  'LOC-010', // PS1-2
+  'LOC-011', // PS3-1
+  'LOC-012'  // PS3-2
+];
+
+function getHelpLocationId(item){
+  if(!item) return '';
+
+  const itemName = String(item.name || '').trim().toLowerCase();
+  const meterName = String(item.meterName || '').trim().toLowerCase();
+
+  /*
+   * IMPORTANT:
+   * Control Panel is its own Location (LOC-004 / LOC-005),
+   * while G1/G2 page photos belong to LOC-002 / LOC-003.
+   * Therefore use the PHOTO NAME first for Control Panel.
+   */
+  if(itemName === 'gas measurement') return 'LOC-001';
+
+  if(itemName === 'g1 control panel') return 'LOC-004';
+  if(itemName === 'g2 control panel') return 'LOC-005';
+
+  if(meterName === 'g1') return 'LOC-002';
+  if(meterName === 'g2') return 'LOC-003';
+
+  if(itemName === 'gas flow no. 1' || itemName === 'gas flow no.1') return 'LOC-006';
+  if(itemName === 'gas flow no. 2' || itemName === 'gas flow no.2') return 'LOC-007';
+  if(itemName === 'gas holder level') return 'LOC-008';
+
+  if(meterName === 'ps1-1') return 'LOC-009';
+  if(meterName === 'ps1-2') return 'LOC-010';
+  if(meterName === 'ps3-1') return 'LOC-011';
+  if(meterName === 'ps3-2') return 'LOC-012';
+
+  return '';
+}
+
+function sortHelpItemsByLocation(items){
+  return (Array.isArray(items) ? items.slice() : []).sort(function(a,b){
+    const aId = getHelpLocationId(a);
+    const bId = getHelpLocationId(b);
+
+    let ai = HELP_LOCATION_ORDER.indexOf(aId);
+    let bi = HELP_LOCATION_ORDER.indexOf(bId);
+
+    if(ai < 0) ai = 9999;
+    if(bi < 0) bi = 9999;
+
+    if(ai !== bi) return ai - bi;
+
+    // Within the same location: Page 1, Page 2, then single/reference photo.
+    const aHasPage = a.pageNo !== null && a.pageNo !== undefined;
+    const bHasPage = b.pageNo !== null && b.pageNo !== undefined;
+    const ap = aHasPage ? Number(a.pageNo) : 999;
+    const bp = bHasPage ? Number(b.pageNo) : 999;
+    if(ap !== bp) return ap - bp;
+
+    return String(a.name || a.meterName || '').localeCompare(
+      String(b.name || b.meterName || ''),
+      undefined,
+      {numeric:true, sensitivity:'base'}
+    );
+  });
+}
+
+function renderHelpLegend(){
+  const items = sortHelpItemsByLocation(HELP_METER_PHOTOS);
+  const grid=document.getElementById('helpLegendGrid');
+  if(!grid) return;
+
+  grid.innerHTML=items.map(item=>{
+    const d=helpPageData(item);
+    let pageText = (item.pageNo!==null && item.pageNo!==undefined)
+      ? 'Page '+item.pageNo
+      : '—';
+
+    let parameterHtml='';
+    if(d.params.length){
+      parameterHtml=d.params.map(p=>{
+        const pn=p.name ? p.name : 'Parameter';
+        const un=p.unit ? p.unit : '—';
+        return `<div class="helpLegendParam">• ${pn} <span>${un}</span></div>`;
+      }).join('');
+    }else if(item.control){
+      parameterHtml='<div class="helpLegendParam helpLegendMuted">Control / reference photo</div>';
+    }else{
+      parameterHtml='<div class="helpLegendParam helpLegendMuted">Parameter belum tersedia</div>';
+    }
+
+    const safeName=String(item.name).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+    return `
+      <article class="helpLegendCard">
+        <div class="helpLegendPhoto" title="Tap untuk buka floating photo">
+          <img class="helpDriveImage" data-help-name="${safeName}" src="${helpImagePlaceholder()}" alt="${safeName}" loading="lazy"
+               onclick="openHelpPhotoFloat(this)" aria-label="Tap untuk buka floating photo">
+          <div class="helpLegendZoomHint">🖼️ Tap • Floating Photo</div>
+        </div>
+        <div class="helpLegendMeta">
+          <div class="helpLegendName">${safeName}</div>
+          <div class="helpLegendLine">📄 <b>${pageText}</b></div>
+          <div class="helpLegendLine">🔬 <b>Parameter / Unit</b></div>
+          <div class="helpLegendUnits">${parameterHtml}</div>
+        </div>
+      </article>`;
+  }).join('');
+
+  loadHelpDriveImages();
+}
+</script>
+
+
+<script>
+function openHelpPage(){
+  const el=document.getElementById('helpPage')||document.getElementById('helpOverlay');
+  if(el) el.style.display='flex';
+}
+</script>
+
+</body>
+</html>
